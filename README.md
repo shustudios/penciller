@@ -10,16 +10,16 @@ npm install @shustudios/penciller
 Import the library into your Vue project (main.js):
 ```
 import Vue from 'vue'
-import Ui from '@shustudios/ui'
+import Ui from '@shustudios/penciller'
 
 Vue.use(Ui)
 ```
 
-For Nuxt projects, create a plugin file (/plugins/ui.js) with the above code and add the plugin to `nuxt.config.js`:
+For Nuxt projects, create a plugin file (/plugins/penciller.js) with the above code and add the plugin to `nuxt.config.js`:
 
 ```
 plugins: [
-  { src: '~plugins/ui.js' },
+  { src: '~plugins/penciller.js' },
 ],
 ```
 
@@ -29,7 +29,7 @@ You will also need to transpile the plugin in `nuxt.config.js`:
 build: {
   extend (config, ctx) {
   },
-  transpile: ['@shustudios/ui']
+  transpile: ['@shustudios/penciller']
 },
   ```
 

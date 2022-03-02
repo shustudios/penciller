@@ -6,7 +6,7 @@
   "scripts": {
   },
   "dependencies": {
-    "fuse.js": "^6.3.1",
+    "fuse.js": "^6.3.1"
   },
   "devDependencies": {
   }
