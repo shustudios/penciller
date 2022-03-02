@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="58px" height="30px" viewBox="0 0 58 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon-arrow-down</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icon-arrow-down" transform="translate(29.000000, 15.000000) rotate(-90.000000) translate(-29.000000, -15.000000) translate(16.000000, -11.000000)" stroke="#000000">
+            <polyline id="Path" stroke-width="4" stroke-linecap="round" points="25.699 38.649 13 51.353 0.302 38.649"></polyline>
+            <polyline id="Path-2" stroke-width="5" points="13.0005 51.0143457 13.0005 0.0306289746 26 0.0306289746"></polyline>
+        </g>
+    </g>
+</svg>
