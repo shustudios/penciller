@@ -155,11 +155,11 @@ export default {
 }
 
 .ui-dialog-ctrl {
-  margin-top: 3rem;
   position: relative;
 }
 
 .ui-dialog .ui-field.--button {
+  margin-top: 3rem;
   user-select: none;
   margin-bottom: 0;
 }

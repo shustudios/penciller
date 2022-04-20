@@ -367,6 +367,10 @@ export default {
   outline: none;
 }
 
+.ui-field.--autosuggest .ui-field-body.--open {
+  border-color: var(--dim-brdr-primary);
+}
+
 .ui-field.--autosuggest .ui-field__input {
   font-size: 1.6rem;
   padding: 1rem;

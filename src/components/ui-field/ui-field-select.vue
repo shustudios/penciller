@@ -351,7 +351,7 @@ export default {
 }
 
 .ui-field.--select .ui-field-body.--open .ui-field__title,
-.ui-field.--select .ui-field-body.--focused .ui-field__title  {
+.ui-field.--select .ui-field-body.--focused:not(.--disabled) .ui-field__title  {
   border-color: var(--dim-brdr-primary);
 }
 

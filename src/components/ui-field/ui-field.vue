@@ -56,7 +56,6 @@ import UiFieldCreditCardExpiry from './ui-field-credit-card-expiry.vue'
 import UiFieldCreditCardCvv from './ui-field-credit-card-cvv.vue'
 import UiFieldDate from './ui-field-date.vue'
 import UiFieldDaterange from './ui-field-daterange.vue'
-import UiFieldEmail from './ui-field-email.vue'
 import UiFieldNumber from './ui-field-number.vue'
 import UiFieldMultiselect from './ui-field-multiselect.vue'
 import UiFieldPhone from './ui-field-phone.vue'
@@ -101,7 +100,6 @@ export default {
         creditcardcvv: UiFieldCreditCardCvv,
         date: UiFieldDate,
         daterange: UiFieldDaterange,
-        email: UiFieldEmail,
         number: UiFieldNumber,
         multiselect: UiFieldMultiselect,
         phone: UiFieldPhone,

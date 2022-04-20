@@ -1,12 +1,12 @@
 <template>
   <div
     :class="bodyClass"
-    :tabindex="localTabIndex"
+    :tabindex="tabindex"
     @keydown.down="handleDownKey"
     @keydown.up="handleUpKey"
     @keydown.enter="handleEnterKey"
     @keydown.escape="handleEscapeKey"
-    @focus="handleOuterFocus"
+    @focus="handleFocus"
   >
     <div
       class="ui-field-tag"
@@ -30,8 +30,7 @@
       @input="handleInput"
       @keydown="handleKeydown"
       @keyup="handleKeyup"
-      @focus="handleInnerFocus"
-      @blur="handleInnerBlur"
+      @focusout="handleBlur"
     />
     <div class="ui-field__icon" @click.stop="handleIcon" />
     <ui-balloon
@@ -109,7 +108,6 @@ export default {
       inputValue: '',
       localOptions: this.formatOptions(this.options),
       localResults: [],
-      localTabIndex: 0,
       isInMenu: false,
       keycodes: {
         semicolon: 186,
@@ -453,20 +451,17 @@ export default {
       if (key === 'Comma' || key === this.keycodes.comma) { this.addFromInput(val, true) }
       if (key === 'Semicolon' || key === this.keycodes.semicolon) { this.addFromInput(val, true) }
     },
-    handleOuterFocus: function () {
+    handleFocus: function () {
       if (!this.open) {
         this.$refs.input.focus()
       }
     },
-    handleInnerFocus: function () {      
-      if (document && document.activeElement === this.$refs.input) {
-        this.localTabIndex = '-1'
-      } else {
-        this.localTabIndex = this.tabindex
+    handleBlur: function (e) {
+      let val = e.currentTarget.value
+
+      if (!this.isInMenu && val !== '') {
+        this.addFromInput(val)
       }
-    },
-    handleInnerBlur: function () {      
-        this.localTabIndex = this.tabindex
     },
   },
 }
@@ -485,6 +480,10 @@ export default {
   align-items: center;
   outline: none;
   padding: 0 4rem 0 0;
+}
+
+.ui-field.--tags .ui-field-body.--open {
+  border-color: var(--dim-brdr-primary);
 }
 
 .ui-field.--tags .ui-field-body.--invalid .ui-field__input {
