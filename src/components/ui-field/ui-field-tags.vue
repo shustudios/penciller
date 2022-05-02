@@ -9,13 +9,17 @@
     @focus="handleFocus"
   >
     <div
-      class="ui-field-tag"
-      v-for="(tag, i) in tags"
+      :class="tagClass(tag)"
       :key="'tag_' + i"
+      v-for="(tag, i) in tags"
     >
       <template v-if="format === 'object'">{{tag.label}}</template>
       <template v-else>{{tag}}</template>
-      <span class="ui-field-tag__close" @click="handleCloseTag($event, i)" />
+      <span
+        class="ui-field-tag__close"
+        v-if="!tag.disabled || tag.disabled === 'false'"
+        @click="handleCloseTag($event, i)"
+      />
     </div>
     <input
       type="text"
@@ -336,6 +340,15 @@ export default {
 
       return output
     },
+    tagClass: function (tag) {
+      let output = 'ui-field-tag'
+
+      if (tag.disabled) {
+        output += ' --disabled'
+      }
+
+      return output
+    },
     trimList: function (results) {
       let output = results
 
@@ -620,6 +633,11 @@ export default {
   margin: 0.5rem 0 0.5rem 0.5rem;
   display: flex;
   align-items: center;
+}
+
+.ui-field.--tags .ui-field-tag.--disabled {
+  color: var(--color-text-tertiary);
+  padding: 0.5rem 3rem 0.5rem 1rem;
 }
 
 .ui-field.--tags .ui-field-tag__close {
