@@ -254,13 +254,15 @@ export default {
       if (this.localDisabled) { return }
       this.open = !this.open
     },
-    handleFromFocus: function () {
+    handleFromFocus: function (e) {
       this.focused = 'from'
       this.lastFocus = this.focused
+      this.$emit('focus', e)
     },
-    handleToFocus: function () {
+    handleToFocus: function (e) {
       this.focused = 'to'
       this.lastFocus = this.focused
+      this.$emit('focus', e)
     },
   },
   mounted: function() {

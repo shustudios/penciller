@@ -271,13 +271,14 @@ export default {
       this.idx = idx
       this.selectOption(e)
     },
-    handleBlur: function () {
+    handleBlur: function (e) {
       if (this.blurlock !== true) {
         this.open = false
         this.focused = false
       }
 
       this.blurlock = false
+      this.$emit('blur', e)
     },
   },
   mounted: function() {

@@ -180,7 +180,7 @@ export default {
       this.open = false
       this.focused = false
     },
-    handleBlur: function () {
+    handleBlur: function (e) {
       if (this.localValue && this.valid) {
         let parts = this.localValue.split('-')
         let date = new Date(Number(parts[0]), Number(parts[1]-1), Number(parts[2]))
@@ -195,6 +195,7 @@ export default {
       }
 
       this.focused = false
+      this.$emit('blur', e)
     }
   },
 }

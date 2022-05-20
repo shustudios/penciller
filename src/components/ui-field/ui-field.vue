@@ -33,6 +33,8 @@
         @icon="handleIconClick"
         @click="handleClick"
         @enter="handleEnter"
+        @focus="handleFocus"
+        @blur="handleBlur"
       />
       <ui-message
         ref="badge"
@@ -119,6 +121,7 @@ export default {
       localDisabled: (this.disabled === 'true' || this.disabled === true),
       localMaxlength: this.maxlength || 64,
       localErrors: 'badge',
+      defaultDisabled: (this.disabled === 'true' || this.disabled === true),
     }
   },
   watch: {
@@ -174,6 +177,12 @@ export default {
       } else {
         this.$emit('alert', e, this.localBadge)
       }
+    },
+    handleFocus: function (e) {
+      this.$emit('focus', e)
+    },
+    handleBlur: function (e) {
+      this.$emit('blur', e)
     },
     getFormComponent: function (component) {
       if (component.$parent) {

@@ -250,6 +250,7 @@ export default {
     handleBlur: function () {
       this.formatDisplay()
       this.focused = false
+      this.$emit('blur', e)
     }
   },
 }

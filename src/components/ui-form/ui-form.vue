@@ -212,11 +212,15 @@ export default {
 
     enable: function () {
       for (let i in this.registry) {
-        this.registry[i].$parent.localDisabled = null
+        if (!this.registry[i].$parent.defaultDisabled) {
+          this.registry[i].$parent.localDisabled = null
+        }
       }
 
       if (this.submitComponent) {
-        this.submitComponent.localDisabled = null
+        if (!this.submitComponent.defaultDisabled) {
+          this.submitComponent.localDisabled = null
+        }
       }
     },
 

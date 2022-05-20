@@ -39,6 +39,7 @@ export default {
       form: this.getFormComponent(this),
       localBadge: this.badge,
       localDisabled: this.disabled,
+      defaultDisabled: (this.disabled === 'true' || this.disabled === true),
     }
   },
   computed: {

@@ -334,9 +334,10 @@ export default {
         }
       }
     },
-    handleOuterFocus: function () {
+    handleOuterFocus: function (e) {
       if (!this.open) {
         this.$refs.input.focus()
+        this.$emit('focus', e)
       }
     },
     handleInnerFocus: function () {      

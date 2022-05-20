@@ -464,9 +464,10 @@ export default {
       if (key === 'Comma' || key === this.keycodes.comma) { this.addFromInput(val, true) }
       if (key === 'Semicolon' || key === this.keycodes.semicolon) { this.addFromInput(val, true) }
     },
-    handleFocus: function () {
+    handleFocus: function (e) {
       if (!this.open) {
         this.$refs.input.focus()
+        this.$emit('focus', e)
       }
     },
     handleBlur: function (e) {
@@ -475,6 +476,8 @@ export default {
       if (!this.isInMenu && val !== '') {
         this.addFromInput(val)
       }
+
+      this.$emit('blur', e)
     },
   },
 }

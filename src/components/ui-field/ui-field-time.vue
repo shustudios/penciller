@@ -395,7 +395,7 @@ export default {
       this.open = false
       this.focused = false
     },
-    handleBlur: function () {
+    handleBlur: function (e) {
       setTimeout(() => {
         let active = document.activeElement
         let ref = this.$refs
@@ -405,6 +405,8 @@ export default {
           this.open = false
           this.validate()
         }
+
+        this.$emit('blur', e)
       }, 100)
     },
     handleHourWheel: function (e) {
@@ -425,9 +427,10 @@ export default {
         }
       }
     },
-    handleOuterFocus: function () {
+    handleOuterFocus: function (e) {
       if (!this.open) {
         this.$refs.hour.focus()
+        this.$emit('focus', e)
       }
     },
     handleInnerFocus: function () {

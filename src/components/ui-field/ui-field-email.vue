@@ -78,10 +78,12 @@ export default {
       this.valid = true
       this.$emit('input', newValue)
     },
-    handleBlur: function () {
+    handleBlur: function (e) {
       if (this.localValue !== '') {
         this.validate()
       }
+
+      this.$emit('blur', e)
     }
   },
 }
