@@ -137,7 +137,7 @@ export default {
       this.localValue = newValue
       this.$emit('update:value', this.localValue)
       this.$emit('update:options', output)
-      this.$emit('filter', output)
+      this.$emit('filter', output, this.localValue)
     },
     format: function (num) {
       let output = num
