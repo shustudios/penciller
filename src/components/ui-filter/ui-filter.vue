@@ -135,6 +135,7 @@ export default {
 
       this.count = output.length
       this.localValue = newValue
+      this.$emit('update:value', this.localValue)
       this.$emit('update:options', output)
       this.$emit('filter', output)
     },

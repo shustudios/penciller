@@ -28,7 +28,6 @@
       :name="name"
       :disabled="localDisabled"
       :value="localValue"
-      :maxlength="maxlength"
       @input="handleInput"
       v-bind="$attrs"
       v-else
@@ -58,7 +57,6 @@ export default {
     form: Object,
     name: String,
     prefix: String,
-    maxlength: [String, Number],
     value: [String, Number],
     decimal: [String, Number],
     disabled: [String, Boolean],
@@ -247,7 +245,7 @@ export default {
         }
       }
     },
-    handleBlur: function () {
+    handleBlur: function (e) {
       this.formatDisplay()
       this.focused = false
       this.$emit('blur', e)
