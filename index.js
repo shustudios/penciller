@@ -1,6 +1,8 @@
 import './src/assets/styles/reset.css'
 import './src/assets/styles/variables.css'
 import './src/assets/styles/layout.css'
+
+import Penciller from './src/includes/penciller.js'
 import Validator from './src/includes/validator.js'
 
 import UiBadge from './src/components/ui-badge/ui-badge.vue'
@@ -30,6 +32,7 @@ export default {
             options.prefix = 'Ui'
         }
 
+        Vue.prototype.$penciller = new Penciller()
         Vue.prototype.$validator = new Validator()
 
         Vue.component(options.prefix + 'Badge', UiBadge)
