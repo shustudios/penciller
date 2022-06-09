@@ -240,11 +240,13 @@ export default {
     handleEscapeKey: function () {
       this.hideBalloon()
     },
-    handleFocus: function () {
+    handleFocus: function (e) {
       this.focused = true
+      this.$emit('focus', e)
     },
-    handleBlur: function () {
+    handleBlur: function (e) {
       this.focused = false
+      this.$emit('blur', e)
     },
     handleBodyClick: function () {
       this.hideBalloon()
