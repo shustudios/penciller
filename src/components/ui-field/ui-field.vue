@@ -152,6 +152,11 @@ export default {
   methods: {
     handleInput: function (newValue) {
       this.localBadge = null
+
+      if (this.localForm && this.localForm.submitComponent) {
+        this.localForm.submitComponent.localBadge = null
+      }
+      
       this.$emit('update:value', newValue)
       this.$emit('input', newValue)
     },

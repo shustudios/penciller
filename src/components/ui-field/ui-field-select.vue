@@ -14,7 +14,8 @@
       @keydown.up="handleUpKey"
       @keydown.escape="handleEscapeKey"
     >
-      {{ localLabel }}<div class="ui-field__caret" />
+      <div class="ui-field__text" v-html="localLabel" />
+      <div class="ui-field__caret" />
     </div>
     <ui-balloon
       ref="menu"
@@ -27,15 +28,14 @@
       <div
         ref="options"
         v-for="(option, idx) in localOptions"
+        v-html="option.label"
         :key="'option_' + idx"
         :data-value="option.value"
         :class="optionClass(option.value, idx)"
         @click="handleOptionClick($event, idx)"
         @mousedown="handleMousedown"
         @mouseover="handleMouseover"
-      >
-      {{ option.label }}
-      </div>
+      />
     </ui-balloon>
   </div>
 </template>
@@ -324,6 +324,10 @@ export default {
   outline: none;
   cursor: pointer;
   position: relative;
+}
+
+.ui-field.--select .ui-field__title .ui-field__text {
+  margin-right: 4rem;
 }
 
 .ui-field.--select .ui-field__title.--placeholder {
