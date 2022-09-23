@@ -1,18 +1,16 @@
 {
-  "name": "@shustudios/penciller",
-  "version": "1.0.23",
-  "private": false,
-  "main": "index.js",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/shustudios/penciller"
-  },
+  "name": "penciller",
+  "version": "0.0.0",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173"
   },
   "dependencies": {
-    "fuse.js": "^6.3.1"
+    "vue": "^3.2.38"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^3.0.3",
+    "vite": "^3.0.9"
   }
 }

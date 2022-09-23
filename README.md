@@ -1,38 +1,29 @@
 # penciller
-UI library for Vue 2
 
-## Installation
-```
-npm install @shustudios/penciller
-```
+This template should help get you started developing with Vue 3 in Vite.
 
-## Usage
-Import the library into your Vue project (main.js):
-```
-import Vue from 'vue'
-import Ui from '@shustudios/penciller'
+## Recommended IDE Setup
 
-Vue.use(Ui)
-```
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
 
-For Nuxt projects, create a plugin file (/plugins/penciller.js) with the above code and add the plugin to `nuxt.config.js`:
+## Customize configuration
 
-```
-plugins: [
-  { src: '~plugins/penciller.js' },
-],
+See [Vite Configuration Reference](https://vitejs.dev/config/).
+
+## Project Setup
+
+```sh
+npm install
 ```
 
-You will also need to transpile the plugin in `nuxt.config.js`:
+### Compile and Hot-Reload for Development
 
+```sh
+npm run dev
 ```
-build: {
-  extend (config, ctx) {
-  },
-  transpile: ['@shustudios/penciller']
-},
-  ```
 
+### Compile and Minify for Production
 
-### Documentation
-Learn more at [Shustudios.Com](https://shustudios.com/penciller/).
+```sh
+npm run build
+```

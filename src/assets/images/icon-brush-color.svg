@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>icon-brush-color</title>
-    <g id="icon-brush-color" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="icon-brush" transform="translate(5.000000, 2.000000)" fill="#FFFFFF">
-            <path d="M0,3.5 C0,1 1.5,0 3.5,0 C4.83333333,0 8.8333333,0 15.5,0 C13.8333333,1.33333333 13,2.66666667 13,4 C13,5.33333333 13.1666667,6.5 13.5,7.5 L0,7.5 C0,6.5 0,5.16666667 0,3.5 Z" id="Path"></path>
-        </g>
-    </g>
-</svg>
