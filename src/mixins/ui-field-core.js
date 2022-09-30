@@ -1,0 +1,305 @@
+export default {
+  emits: [
+    'input',
+    'enter',
+    'icon',
+    'focus',
+    'blur',
+    'query',
+    'check',
+    'click',
+    'start',
+    'stop',
+  ],
+  data() {
+    return {
+      valid: true,
+      focused: false,
+      open: false,
+      localChecked: false,
+    }
+  },
+  computed: {
+    localValue: {
+      get () {
+        return this.fieldValue
+      },
+      set (newValue) {
+        this.$emit('input', newValue)
+        return newValue
+      }
+    },
+    localDisabled: {
+      get () {
+        return this.$penciller.utils.isTrue(this.disabled)
+      },
+      set (newValue) {
+        return newValue
+      }
+    },
+    localContainer () {
+      let output = null
+
+      if (this.container) {
+        output = this.container
+      }
+
+      return output
+    },
+    tabindex () {
+      let output = -1
+
+      if (!this.localDisabled) {
+        if (this.$attrs.tabindex) {
+          output = this.$attrs.tabindex
+        } else {
+          output = 0
+        }
+      }
+      
+      return output
+    },
+    bodyClass () {
+      let output = 'ui-field-body'
+
+      if (this.localDisabled) { output += ' --disabled' }
+      if (this.localChecked) { output += ' --checked' }
+      if (this.open) { output += ' --open' }
+      if (this.focused) { output += ' --focused' }
+      if (this.valid === false) { output += ' --invalid' }
+
+      return output
+    },
+  },
+  methods: {
+    getListener (name) {
+      let output = false
+
+      if (this.$parent.$listeners) {
+        if (this.$parent.$listeners[name]) {
+          output = this.$parent.$listeners[name]
+        }
+      } else if (this.$parent.$attrs[name]) {
+        output = this.$parent.$attrs[name]
+      }
+
+      return output
+    },
+    maskValue(str, format, sel) {
+      let val = str
+      let pos = sel
+
+      if (!this.$penciller.utils.isUndefined(str)) {
+        switch (format) {
+          case 'machine':
+            val = val.replace(/ /g,'-')
+            val = val.replace(/[^a-zA-Z0-9-]/g, '')
+            break
+
+          case 'number':
+            val = false
+
+            if (str.length === 0 || str === '-' || str === '.' ||  !isNaN(str)) {
+              val = str
+            }
+            break
+
+          case 'hex':
+            val = str.substring(1)
+            break
+
+          case 'date':
+            if (str.substr(4, 1) !== '-') {
+              if (val.length > 4 && val.length <= 10) {
+                if (sel === str.length && sel < 6) { pos++ }
+                val = str.slice(0, 4) + '-' + str.slice(4)
+              }
+            }
+    
+            if (val.substr(7, 1) !== '-') {
+              if (val.length > 7 && val.length <= 10) {
+                if (sel === (str.length+1) && sel < 9) { pos++ }
+                val = val.slice(0, 7) + '-' + val.slice(7)
+              }
+            }
+            break
+
+          case 'phone':
+            if (str.substr(3, 1) !== '-') {
+              if (val.length > 3 && val.length <= 11) {
+                if (sel === str.length && sel < 5) { pos++ }
+                val = str.slice(0, 3) + '-' + str.slice(3)
+              }
+            }
+    
+            if (val.substr(7, 1) !== '-') {
+              if (val.length > 7 && val.length <= 11) {
+                if (sel == (str.length+1) && sel < 10) { pos++ }
+                val = val.slice(0, 7) + '-' + val.slice(7)
+              }
+            }
+            break
+
+          case 'cc_expiry':
+            val = val.replace(/\D/g, '')
+            val = val.replace(/(\d{2})/, '$1/')
+            break
+        }
+      }
+
+      return { val, pos }
+    },
+    unmaskValue(str, format) {
+      let output = str
+
+      if (!this.$penciller.utils.isUndefined(str)) {
+        switch (format) {
+          case 'phone':
+          case 'date':
+            output = str.replace(/-/g, '')
+            break
+
+          case 'hex':
+            output = '#' + str
+            break
+        }
+      }
+      
+      return output
+    },
+    isValidFormat(str, format) {
+      let output = false
+      let regex
+
+      switch (format) {
+        case 'phone':
+          regex = new RegExp(/^[0-9-]+$/g)
+
+          if (regex.test(str) && str.length < 11) {
+            output = true
+          }
+          break
+
+        case 'date':
+          regex = new RegExp(/^[0-9-]+$/g)
+
+          if (regex.test(str) && str.length < 9) {
+            output = true
+          }
+          break
+
+        case 'hex':
+          regex = new RegExp(/^#[0-9A-F]+$/gi)
+
+          if (regex.test(str) && str.length < 8) {
+            output = true
+          }
+          break
+
+        case 'time':
+          regex = new RegExp(/^[0-9]+$/g)
+
+          if (str === '' || (regex.test(str) && str.length < 3)) {
+            output = true
+          }
+          break
+      }
+
+      return output
+    },
+    extend (orig_obj, new_obj, add) {
+      if (new_obj) {
+        Object.keys(new_obj).forEach(key => {
+          if (orig_obj.hasOwnProperty(key) || add === true) {
+            orig_obj[key] = new_obj[key];
+          }
+        });
+      }
+
+      return orig_obj;
+    },
+    showBalloon () {
+      this.open = true
+    },
+    hideBalloon () {
+      this.open = false
+    },
+    handleIcon (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      this.toggleBalloon()
+    },
+    handleCloseBalloon () {
+      this.hideBalloon()
+    },
+    handleDownKey (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      this.nextOption()
+    },
+    handleUpKey (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      this.prevOption()
+    },
+    handleEscapeKey () {
+      this.hideBalloon()
+    },
+    handleFocus (e) {
+      this.focused = true
+      this.$emit('focus', e)
+    },
+    handleBlur (e) {
+      this.focused = false
+      this.$emit('blur', e)
+    },
+    handleBodyClick () {
+      this.hideBalloon()
+    }
+  },
+  mounted() {
+    if (this.form) { this.form.register(this) }
+
+    if (this.$refs.input) {
+      if (this.$penciller.utils.isTrue(this.focus) || this.$penciller.utils.isTrue(this.select)) {
+        this.$refs.input.focus()
+  
+        if (this.select) {
+          this.$refs.input.select()
+        }
+          
+        this.handleFocus()
+      }
+      
+      this.$refs.input.addEventListener('focus', this.handleFocus)
+      this.$refs.input.addEventListener('blur', this.handleBlur)
+    }
+
+    if (typeof document === 'object') {
+      document.addEventListener('click', this.handleBodyClick)
+    }
+
+    if (this.afterMount) {
+      this.afterMount()
+    }
+  },
+  beforeDestroy () {
+    if (this.form) { this.form.unRegister(this) }
+
+    if (this.$refs.input) {
+      this.$refs.input.removeEventListener('focus', this.handleFocus)
+      this.$refs.input.removeEventListener('blur', this.handleBlur)
+    }
+
+    if (typeof document === 'object') {
+      document.removeEventListener('click', this.handleBodyClick)
+    }
+
+    if (this.afterDestroy) {
+      this.afterDestroy()
+    }
+  }
+}

@@ -1,0 +1,37 @@
+.ui-cols {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ui-cols.--left {
+  justify-content: flex-start;
+}
+
+.ui-cols.--top {
+  align-items: flex-start;
+}
+
+.ui-cols.--right {
+  align-items: flex-end;
+}
+
+.ui-cols.--bottom {
+  align-items: flex-end;
+}
+
+.ui-cols > * {
+  margin: 0.5rem;
+}
+
+.ui-cols > .--expanded {
+  flex-grow: 1;
+}
+
+.ui-cols > :first-child {
+  margin-left: 0;
+}
+
+.ui-cols > :last-child {
+  margin-right: 0;
+}

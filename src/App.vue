@@ -1,47 +1,44 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <ui-form @submit="handleSubmit">
+    <ui-field type="tags" name="tags" label="Find" :options="list" />
+    <ui-field type="checkbox" name="checkbox" label="This is a checkbox" />
+    <ui-field type="time" name="time" />
+    <ui-submit label="Submit" name="submit" />
+  </ui-form>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
+<script>
+export default {
+  name: 'App',
+  data () {
+    return {
+      list: [
+        { label: 'Option One', value: 'op1' },
+        { label: 'Option Two', value: 'op2' },
+        { label: 'Option Three', value: 'op3' },
+      ]
+    }
+  },
+  methods: {
+    handleSubmit (form) {
+      if (form) {
+        console.log('form submitted', form.fields)
+      }
+    }
+  }
+}
+</script>
+
+<style>
+#app {
+  margin: 4rem;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.ui-field:not(.--daterange) {
+  max-width: 30rem;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.ui-field.--daterange {
+  max-width: 60rem;
 }
 </style>

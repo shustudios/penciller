@@ -1,0 +1,437 @@
+<template>
+  <div
+    ref="dropdown"
+    :class="bodyClass"
+    v-bind="$attrs" >
+    <div
+      ref="title"
+      :class="titleClass"
+      :tabindex="tabindex"
+      @click="handleClick"
+      @keydown.space="handleSpaceKey"
+      @keydown.enter="handleEnterKey"
+      @keydown.down="handleDownKey"
+      @keydown.up="handleUpKey"
+      @keydown.escape="handleEscapeKey"
+    >
+      {{ localLabel }}<div class="ui-field__caret" />
+    </div>
+    <ui-balloon
+      ref="menu"
+      transition="slide"
+      :class="balloonClass"
+      :container="container"
+      :enabled="open"
+      @close="handleCloseBalloon"
+    >
+      <div
+        ref="options"
+        v-for="(option, idx) in localOptions"
+        :key="'option_' + idx"
+        :data-value="option.value"
+        :class="optionClass(option.value, idx)"
+        @click="handleOptionClick($event, idx)"
+        @mousedown="handleMousedown"
+        @mouseover="handleMouseover"
+      >
+      {{ option.label }}
+      </div>
+    </ui-balloon>
+  </div>
+</template>
+
+<script>
+import UiFieldCore from '../../mixins/ui-field-core.js'
+import UiBalloon from '../ui-balloon/ui-balloon.vue'
+
+export default {
+  name: 'ui-field-select',
+  inheritAttrs: false,
+  components: {
+    UiBalloon,
+  },
+  props: {
+    form: Object,
+    fieldValue: [String, Number],
+    options: [Object, Array],
+    name: String,
+    disabled: [String, Boolean],
+    placeholder: String,
+    container: null,
+    rules: {
+      type: Array,
+      default: () => ['required']
+    }
+  },
+  mixins: [UiFieldCore],
+  data () {
+    return {
+      inlinestyle: '',
+      idx: -1,
+      blurlock: false,
+    }
+  },
+  computed: {
+    localLabel: {
+      get () {
+        let output = '- select -'
+        let optionLabel = this.findOptionLabel(this.localValue)
+
+        if (optionLabel) { output = optionLabel }
+        else if (this.placeholder) { output = this.placeholder }
+        
+        return output
+      },
+      set (newValue) {
+        return newValue
+      }
+    },
+    localOptions () {
+      return this.formatOptions(this.options)
+    },
+    balloonClass () {
+      let output = 'ui-select-balloon'
+
+      if (this.open) {
+        output += ' --open'
+      }
+
+      if (this.$attrs.hasOwnProperty('balloonClass')) {
+        output += ' ' + this.$attrs.balloonClass
+      }
+
+      return output
+    },
+    titleClass () {
+      let output = 'ui-field__title'
+
+      if (this.$penciller.utils.isUndefined(this.localValue)) {
+        output += ' --placeholder'
+      }
+
+      return output
+    }
+  },
+  methods: {
+    toggleBalloon (e) {
+      if (this.localDisabled) { return }
+
+      e.preventDefault()
+      e.stopPropagation()
+
+      if (this.$penciller.utils.isUndefined(this.fieldValue)) {
+        this.idx = -1
+      }
+      
+      this.open = !this.open
+    },
+    optionClass (val, idx) {
+      let output = 'ui-field-item'
+
+      if (this.localValue === val) {
+          output += ' --selected'
+      }
+
+      if (this.focused === (idx + 1)) {
+          output += ' --focused'
+      }
+
+      return output
+    },
+    prevOption (e) {
+      if (this.localDisabled) { return }
+      if (!this.open) {
+        this.open = true
+        return
+      }
+
+      e.preventDefault()
+      this.idx--
+
+      if (this.idx < 0) {
+        this.idx = this.localOptions.length - 1;
+      }
+
+      this.focused = this.idx + 1
+    },
+    nextOption (e) {
+      if (this.localDisabled) { return }
+      if (!this.open) {
+          this.open = true
+          return
+      }
+
+      e.preventDefault()
+      this.idx++
+
+      if (this.idx > this.localOptions.length - 1) {
+        this.idx = 0
+      }
+
+      this.focused = this.idx + 1
+    },
+    selectOption (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      let val = this.localOptions[this.idx].value
+
+      this.open = false
+      this.localLabel = this.localOptions[val]
+      this.$emit('input', val)
+    },
+    findOptionLabel (val) {
+      let output = false
+
+      for (let idx=0; idx<this.localOptions.length; idx++) {
+        if (this.localOptions[idx].value === val) {
+          output = this.localOptions[idx].label
+          break
+        }
+      }
+
+      return output
+    },
+    formatOptions (options) {
+      let output = options
+
+      if (typeof options === 'object' && !Array.isArray(options)) {
+        output = []
+        
+        for (let key in options) {
+          output.push({ label: options[key], value: key })
+        }
+      }
+
+      return output
+    },
+    handleMousedown (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      this.blurlock = true
+    },
+    handleMouseover (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      this.focused = false
+    },
+    handleClick (e) {
+      if (this.localDisabled) { return }
+
+      this.toggleBalloon(e)
+    },
+    handleSpaceKey (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (this.open) {
+        if (this.idx < 0) {
+          this.open = false
+        } else {
+          this.selectOption(e)
+        }
+      } else {
+        this.open = true
+      }
+    },
+    handleEnterKey (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (this.open) {
+        this.selectOption(e)
+      }
+    },
+    handleDownKey (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (!this.open) {
+        this.open = true
+      }
+
+      this.nextOption(e)
+    },
+    handleUpKey (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (!this.open) {
+        this.open = true
+      }
+
+      this.prevOption(e)
+    },
+    handleOptionClick (e, idx) {
+      if (this.localDisabled) { return }
+      e.stopPropagation();
+
+      this.idx = idx
+      this.selectOption(e)
+    },
+    handleBlur () {
+      if (this.blurlock !== true) {
+        this.open = false
+        this.focused = false
+      }
+
+      this.blurlock = false
+    },
+  },
+  mounted () {
+    if (this.form) { this.form.register(this) }
+
+    if (typeof document === 'object') {
+      document.addEventListener('click', this.handleBodyClick)
+    }
+
+    this.$refs.title.addEventListener('focus', this.handleFocus)
+    this.$refs.title.addEventListener('blur', this.handleBlur)
+  },
+  beforeDestroy () {
+    if (this.form) { this.form.unRegister(this) }
+
+    this.$refs.title.removeEventListener('focus', this.handleFocus)
+    this.$refs.title.removeEventListener('blur', this.handleBlur)
+
+    if (typeof document === 'object') {
+      document.removeEventListener('click', this.handleBodyClick)
+    }
+  }
+}
+</script>
+
+<style>
+.ui-field.--select .ui-field-body {
+  position: relative;
+  user-select: none;
+}
+
+.ui-field.--select .ui-field__title {
+  font-size: 1.6rem;
+  padding: 1rem;
+  border-radius: 0.4rem;
+  border: solid 0.2rem var(--color-brdr-primary);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  resize: none;
+  display: block;
+  width: 100%;
+  transition: all 0.3s ease-out;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.ui-field.--select .ui-field__title.--placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.ui-field.--select .ui-field__caret {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4rem;
+  height: 100%;
+  background: url('../../assets/images/icon-cheveron-down.svg') center center no-repeat;
+  opacity: 0.3;
+  transition: transform 0.2s ease-out;
+}
+
+.ui-field.--select .ui-field-body.--open .ui-field__caret {
+  opacity: 0.7;
+  transform: rotate(180deg);
+}
+
+.ui-field.--select .ui-field-body.--disabled .ui-field__title {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.ui-field.--select .ui-field-body.--open .ui-field__title,
+.ui-field.--select .ui-field-body.--focused .ui-field__title  {
+  border-color: var(--dim-brdr-primary);
+}
+
+.ui-select-balloon {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  border-radius: 0.4rem;
+  border: solid 0.2rem var(--dim-brdr-primary);
+  background-color: var(--color-bg-primary);
+  box-shadow: 0.2rem 0.2rem var(--shade);
+  overflow: auto;
+  user-select: none;
+  max-height: 30rem;
+}
+
+.ui-select-balloon .ui-field-item {
+  padding: 1rem 1rem 1rem 4rem;
+  cursor: pointer;
+  border-top: solid 0.1rem var(--color-brdr-quarternary);
+  outline: none;
+  position: relative;
+  color: var(--color-text-primary);
+}
+
+.ui-select-balloon .ui-field-item:first-child {
+  border: none;
+}
+
+.ui-select-balloon .ui-field-item.--selected:before {
+  content: '';
+  background-position: 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-image: url('../../assets/images/icon-check.svg');
+  display: block;
+  width: 3rem;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.ui-select-balloon .ui-field-item.--focused  {
+  background-color: var(--dim-bg-primary);
+  color: var(--color-text-inverted);
+  border-color: var(--dim-bg-primary);
+}
+
+.ui-select-balloon .ui-field-item.--focused + .ui-field-item {
+  border-color: var(--dim-bg-primary);
+}
+
+.ui-select-balloon .ui-field-item.--focused:before {
+  filter: invert(100%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ui-field.--select .ui-field-body:not(.--disabled):not(.--focused):hover .ui-field__title {
+    border-color: var(--hilite-brdr-primary);
+  }
+
+  .ui-field.--select .ui-field-body:not(.--disabled) .ui-field__caret:hover {
+    opacity: 0.7;
+  }
+
+  .ui-select-balloon .ui-field-item:hover {
+    background-color: var(--hilite-bg-primary);
+    color: var(--color-text-inverted);
+    border-color: var(--hilite-bg-primary);
+  }
+
+  .ui-select-balloon .ui-field-item:hover + .ui-field-item {
+    border-color: var(--hilite-bg-primary);
+  }
+
+  .ui-select-balloon .ui-field-item.--selected:hover:before {
+    filter: invert(100%);
+  }
+}
+</style>
