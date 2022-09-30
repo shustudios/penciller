@@ -43,7 +43,7 @@ export default {
     }
   },
   mixins: [UiFieldCore],
-  data: function () {
+  data () {
     return {
       charlength: (this.fieldValue) ? this.fieldValue.length : 0,
       focused: false,
@@ -54,15 +54,15 @@ export default {
   },
   computed: {
     localValue: {
-      get: function () {
+      get () {
         return this.fieldValue
       },
-      set: function(newValue) {
+      set (newValue) {
         this.charlength = (newValue) ? newValue.length : 0
         this.$emit('input', newValue)
       }
     },
-    charinfo: function () {
+    charinfo () {
       let output = 'ui-field-charinfo'
 
       if (this.charlength > 0) {
@@ -71,7 +71,7 @@ export default {
 
       return output
     },
-    inputClass: function () {
+    inputClass () {
       let output = 'ui-field__input'
 
       if (this.$penciller.utils.isTrue(this.autosize)) {
@@ -82,12 +82,12 @@ export default {
     },
   },
   watch: {
-    localValue: function () {
+    localValue () {
       this.updateSize()
     }
   },
   methods: {
-    updateSize: function () {
+    updateSize () {
       if (this.$penciller.utils.isTrue(this.autosize)) {
         let input = this.$refs.input
         let padding = parseInt(window.getComputedStyle(input).getPropertyValue('padding-bottom'), 10)
@@ -98,11 +98,11 @@ export default {
         }
       }
     },
-    handleInput: function (e) {
+    handleInput (e) {
       this.localValue = e.currentTarget.value
     },
   },
-  mounted: function () {
+  mounted () {
     if (this.form) { this.form.register(this) }
     if (this.$penciller.utils.isTrue(this.focus) || this.$penciller.utils.isTrue(this.select)) {
       this.$refs.input.focus()
@@ -121,7 +121,7 @@ export default {
     this.observer.observe(this.$refs.input)
     this.updateSize()
   },
-  beforeDestroy: function () {
+  beforeDestroy () {
     if (this.form) { this.form.unRegister(this) }
 
     if (this.observer) {
