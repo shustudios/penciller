@@ -4,6 +4,7 @@
     <ui-field type="checkbox" name="checkbox" label="This is a checkbox" />
     <ui-field type="time" name="time" />
     <ui-submit label="Submit" name="submit" />
+    <ui-tasklist :value="tasks" @input="handleInput" />
   </ui-form>
 </template>
 
@@ -16,7 +17,8 @@ export default {
         { label: 'Option One', value: 'op1' },
         { label: 'Option Two', value: 'op2' },
         { label: 'Option Three', value: 'op3' },
-      ]
+      ],
+      tasks: [],
     }
   },
   methods: {
@@ -24,6 +26,9 @@ export default {
       if (form) {
         console.log('form submitted', form.fields)
       }
+    },
+    handleInput (newValue) {
+      this.tasks = newValue
     }
   }
 }
