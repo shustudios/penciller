@@ -36,7 +36,6 @@
       >
         <ui-task
           type="task"
-          class="--sub"
           :ref="'subtasks_' + i"
           :name="name + '_' + i + '_' + j"
           :value="subtask.label"
@@ -201,7 +200,7 @@ export default {
       }
     },
     moveTask (taskIdx, subtaskIdx, into) {
-      let tasks = JSON.parse(JSON.stringify(this.localValue))
+      let tasks = this.$penciller.utils.clone(this.localValue)
       let snip
       let idx
 
@@ -231,9 +230,9 @@ export default {
           tasks.splice(idx, 0, snip)
         }
 
-        if (this.dragged.subtask !== null) {
-          tasks[idx].subtasks = []
-        }
+        // if (this.dragged.subtask !== null) { // not sure why I had this
+        //   tasks[idx].subtasks = []
+        // }
       } else {
         idx = taskIdx
         let subidx = subtaskIdx
@@ -362,7 +361,7 @@ export default {
       if (this.localValue[taskIdx].subtasks.length > 0) {
         subtaskIdx = this.localValue[taskIdx].subtasks.length
       }
-
+console.log(newValue, taskIdx, subtaskIdx)
       this.insertTask(newValue, taskIdx, subtaskIdx, true)
     },
     handleRemove (taskIdx, subtaskIdx) {

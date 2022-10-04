@@ -117,6 +117,7 @@ export default {
         if (this.drag) { output += ' --drag' }
         if (this.draggable) { output += ' --draggable' }
         if (this.over) { output += ' --over' }
+        if (this.subIdx !== null) { output += ' --sub' }
         if (!this.$penciller.utils.isTrue(this.editable)) { output += ' --no-edit' }
 
         return output

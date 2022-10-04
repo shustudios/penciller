@@ -2,7 +2,7 @@
   <ui-form @submit="handleSubmit">
     <ui-field type="tags" name="tags" label="Find" :options="list" />
     <ui-field type="checkbox" name="checkbox" label="This is a checkbox" />
-    <ui-field type="time" name="time" />
+    <ui-field type="daterange" name="daterange" />
     <ui-submit label="Submit" name="submit" />
     <ui-tasklist :value="tasks" @input="handleInput" />
   </ui-form>
@@ -18,7 +18,25 @@ export default {
         { label: 'Option Two', value: 'op2' },
         { label: 'Option Three', value: 'op3' },
       ],
-      tasks: [],
+      tasks: [
+      {
+        label: 'Task One',
+        subtasks: [
+          {
+            label: 'Task One Subtask One',
+            subtasks: [],
+          },
+          {
+            label: 'Task One Subtask Two',
+            subtasks: [],
+          },
+        ],
+      },
+      {
+        label: 'Task Two',
+        subtasks: [],
+      },
+    ],
     }
   },
   methods: {

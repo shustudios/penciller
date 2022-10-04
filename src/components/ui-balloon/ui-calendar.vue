@@ -208,7 +208,7 @@ export default {
 
       if (this.type === 'daterange') {
         if (typeof this.value === 'object') {
-          let val = this.value
+          let val = this.$penciller.utils.clone(this.value)
           val.id = id
 
           let f = new Date(val.from).getTime()
