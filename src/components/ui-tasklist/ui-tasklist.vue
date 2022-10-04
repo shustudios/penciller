@@ -248,26 +248,32 @@ export default {
         tasks[idx].subtasks.splice(subidx, 0, snip)
       }
 
-      this.dragged = null
       this.localValue = tasks
       this.updateList()
+      this.$nextTick(() => {
+        this.updateParentCheck(this.dragged.task)
+        this.updateParentCheck(taskIdx)
+        this.dragged = null
+      })
     },
     updateParentCheck (taskIdx) {
       let checkCount = 0
 
-      if (this.localValue[taskIdx].subtasks.length > 0) {
-        for (let idx=0; idx<this.localValue[taskIdx].subtasks.length; idx++) {          
-          if (this.localValue[taskIdx].subtasks[idx].completed) {
-            checkCount++
+      if (this.localValue[taskIdx]) {
+        if (this.localValue[taskIdx].subtasks.length > 0) {
+          for (let idx=0; idx<this.localValue[taskIdx].subtasks.length; idx++) {          
+            if (this.localValue[taskIdx].subtasks[idx].completed) {
+              checkCount++
+            }
           }
-        }
 
-        if (checkCount > 0 && checkCount === this.localValue[taskIdx].subtasks.length) {
-          this.localValue[taskIdx].completed = true
-        } else if (checkCount === 0) {
-          this.localValue[taskIdx].completed = false
-        } else {
-          this.localValue[taskIdx].completed = null
+          if (checkCount > 0 && checkCount === this.localValue[taskIdx].subtasks.length) {
+            this.localValue[taskIdx].completed = true
+          } else if (checkCount === 0) {
+            this.localValue[taskIdx].completed = false
+          } else {
+            this.localValue[taskIdx].completed = null
+          }
         }
       }
     },
@@ -361,7 +367,6 @@ export default {
       if (this.localValue[taskIdx].subtasks.length > 0) {
         subtaskIdx = this.localValue[taskIdx].subtasks.length
       }
-console.log(newValue, taskIdx, subtaskIdx)
       this.insertTask(newValue, taskIdx, subtaskIdx, true)
     },
     handleRemove (taskIdx, subtaskIdx) {
