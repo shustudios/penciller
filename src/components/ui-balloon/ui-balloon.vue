@@ -207,7 +207,7 @@ export default {
   transition: margin-top 0.2s ease-out, opacity 0.2s ease-out;
 }
 
-.ui-balloon-slide-enter-from, .ui-balloon-slide-leave-to {
+.ui-balloon-slide-enter, .ui-balloon-slide-enter-from, .ui-balloon-slide-leave-to {
   margin-top: 0 !important;
   opacity: 0;
 }

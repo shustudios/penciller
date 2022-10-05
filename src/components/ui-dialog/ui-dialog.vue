@@ -190,11 +190,11 @@ export default {
   transition: all 0.3s ease-out;
 }
 
-.dialog-fade-enter-from, .dialog-fade-leave-to {
+.dialog-fade-enter, .dialog-fade-enter-from, .dialog-fade-leave-to {
   opacity: 0;
 }
 
-.dialog-fade-enter-from.ui-dialog {
+.dialog-fade-enter.ui-dialog, .dialog-fade-enter-from.ui-dialog {
   transform: scale(0.95);
 }
 </style>

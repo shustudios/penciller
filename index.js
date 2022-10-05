@@ -20,9 +20,15 @@ import UiTree from './src/components/ui-tree/ui-tree.vue'
 
 export default {
     install(Vue) {
-        Vue.config.globalProperties.$penciller = new Penciller()
-        
-        let prefix = Vue.config.globalProperties.$penciller.prefix
+        let prefix
+
+        if (Vue.prototype) {
+            Vue.prototype.$penciller = new Penciller() // Vue 2
+            prefix = Vue.prototype.$penciller.prefix
+        } else {
+            Vue.config.globalProperties.$penciller = new Penciller()
+            prefix = Vue.config.globalProperties.$penciller.prefix
+        }
 
         Vue.component(prefix + 'Badge', UiBadge)
         Vue.component(prefix + 'Collection', UiCollection)
