@@ -4,7 +4,7 @@
     <ui-field type="checkbox" name="checkbox" label="This is a checkbox" />
     <ui-field type="daterange" name="daterange" />
     <ui-submit label="Submit" name="submit" />
-    <ui-tasklist :value="tasks" @input="handleInput" />
+    <ui-tree :options="tree" editable="true" />
   </ui-form>
 </template>
 
@@ -19,24 +19,41 @@ export default {
         { label: 'Option Three', value: 'op3' },
       ],
       tasks: [
-      {
-        label: 'Task One',
-        subtasks: [
+        {
+          label: 'Task One',
+          subtasks: [
+            {
+              label: 'Task One Subtask One',
+              subtasks: [],
+            },
+            {
+              label: 'Task One Subtask Two',
+              subtasks: [],
+            },
+          ],
+        },
+        {
+          label: 'Task Two',
+          subtasks: [],
+        },
+      ],
+      tree: {
+        label: 'Book',
+        children: [
           {
-            label: 'Task One Subtask One',
-            subtasks: [],
+            label: 'Chapter One',
+            children: [
+              { label: 'Paragraph One' },
+              { label: 'Paragraph Two' },
+              { label: 'Paragraph Three' },
+              { label: 'Paragraph Four' },
+              { label: 'Paragraph Five' },
+            ]
           },
-          {
-            label: 'Task One Subtask Two',
-            subtasks: [],
-          },
-        ],
-      },
-      {
-        label: 'Task Two',
-        subtasks: [],
-      },
-    ],
+          { label: 'Chapter Two' },
+          { label: 'Chapter Three' },
+        ]
+      }
     }
   },
   methods: {

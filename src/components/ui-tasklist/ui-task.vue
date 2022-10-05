@@ -135,7 +135,7 @@ export default {
       e.preventDefault()
 
       if (e.shiftKey) {
-        this.$emit('append', '', this.idx)
+        this.$emit('append', '', this.idx, this.subIdx)
       } else {
         this.$emit('add', '', this.idx)
       }

@@ -361,12 +361,17 @@ export default {
     handleAdd (newValue, taskIdx) {
       this.insertTask(newValue, taskIdx + 1, null, true)
     },
-    handleAppend (newValue, taskIdx) {
-      let subtaskIdx = 0
-
-      if (this.localValue[taskIdx].subtasks.length > 0) {
-        subtaskIdx = this.localValue[taskIdx].subtasks.length
+    handleAppend (newValue, taskIdx, subtaskIdx) {
+      if (subtaskIdx === null) {
+        subtaskIdx = 0
+      } else {
+        if (subtaskIdx > this.localValue[taskIdx].subtasks.length - 1) {
+          subtaskIdx = this.localValue[taskIdx].subtasks.length
+        } else {
+          subtaskIdx++
+        }
       }
+
       this.insertTask(newValue, taskIdx, subtaskIdx, true)
     },
     handleRemove (taskIdx, subtaskIdx) {

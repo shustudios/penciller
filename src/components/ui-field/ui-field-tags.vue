@@ -324,7 +324,7 @@ export default {
 
       for (let tagsIdx=0; tagsIdx<this.tags.length; tagsIdx++) {
         if (this.format === 'object') {
-          if (this.tags[tagsIdx].label === result.value) {
+          if (this.tags[tagsIdx].value === result.value) {
             output += ' --selected'
           }
         } else {
