@@ -1,10 +1,10 @@
 <template>
   <ui-form @submit="handleSubmit">
-    <ui-field type="tags" name="tags" label="Find" :options="list" />
-    <ui-field type="checkbox" name="checkbox" label="This is a checkbox" />
-    <ui-field type="daterange" name="daterange" />
+    <!-- <ui-field type="tags" name="tags" label="Find" :options="list" /> -->
+    <ui-field type="checkbox" name="checkbox" label="This is a checkbox" value="tester" />
+    <!-- <ui-field type="daterange" name="daterange" /> -->
     <ui-submit label="Submit" name="submit" />
-    <ui-tree :options="tree" editable="true" />
+    <!-- <ui-tree :options="tree" editable="true" /> -->
   </ui-form>
 </template>
 
