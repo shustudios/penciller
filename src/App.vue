@@ -1,8 +1,8 @@
 <template>
   <ui-form @submit="handleSubmit">
-    <!-- <ui-field type="tags" name="tags" label="Find" :options="list" /> -->
+    <ui-field type="tags" name="tags" label="Find" :options="list" />
     <ui-field type="checkbox" name="checkbox" label="This is a checkbox" value="tester" />
-    <!-- <ui-field type="daterange" name="daterange" /> -->
+    <ui-field type="color" name="color" value="99cc33" />
     <ui-submit label="Submit" name="submit" />
     <!-- <ui-tree :options="tree" editable="true" /> -->
   </ui-form>
