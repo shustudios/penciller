@@ -1,7 +1,7 @@
 <template>
   <ui-form @submit="handleSubmit">
-    <ui-field type="date" name="date" label="Date" />
-    <ui-field type="daterange" name="range" label="Range" />
+    <ui-field type="tags" name="select" :options="tags" label="Tags" :delimiters="['Comma', 'Space', 'Semicolon']" />
+    <ui-field type="text" name="range" label="Range" />
   </ui-form>
 </template>
 
@@ -10,6 +10,10 @@ export default {
   name: 'App',
   data () {
     return {
+      tags: [
+        { label: 'milk', value: 'milk' },
+        { label: 'cookies', value: 'cookies' },
+      ],
       list: [
         { label: 'Option One', value: 'op1' },
         { label: 'Option Two', value: 'op2' },
