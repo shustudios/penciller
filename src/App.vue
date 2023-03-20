@@ -1,6 +1,7 @@
 <template>
   <ui-form @submit="handleSubmit">
-    <ui-field type="tags" name="select" :options="tags" label="Tags" :delimiters="['Comma', 'Space', 'Semicolon']" />
+    <ui-field type="tags" name="tags" :options="tags" label="Tags" :delimiters="['Comma', 'Space', 'Semicolon']" disabled="true" />
+    <ui-field type="select" name="select" :options="tags" disabled="true" />
     <ui-field type="text" name="range" label="Range" />
   </ui-form>
 </template>
