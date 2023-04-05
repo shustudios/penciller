@@ -1,8 +1,9 @@
 <template>
   <ui-form @submit="handleSubmit">
-    <ui-field type="tags" name="tags" :options="tags" label="Tags" :delimiters="['Comma', 'Space', 'Semicolon']" disabled="true" />
-    <ui-field type="select" name="select" :options="tags" disabled="true" />
+    <ui-field type="tags" name="tags" :options="tags" label="Tags" :delimiters="['Comma', 'Space', 'Semicolon']" />
+    <ui-field type="select" name="select" :options="tags" />
     <ui-field type="text" name="range" label="Range" />
+    <ui-submit label="Send" noisy="true" />
   </ui-form>
 </template>
 
@@ -11,6 +12,10 @@ export default {
   name: 'App',
   data () {
     return {
+      badge: {
+        type: 'error',
+        message: 'Test message',
+      },
       tags: [
         { label: 'milk', value: 'milk' },
         { label: 'cookies', value: 'cookies' },
@@ -61,6 +66,7 @@ export default {
   methods: {
     handleSubmit (form) {
       if (form) {
+        form.startProcessing()
         console.log('form submitted', form.fields)
       }
     },
