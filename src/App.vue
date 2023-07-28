@@ -1,8 +1,7 @@
 <template>
   <ui-form @submit="handleSubmit">
-    <ui-field type="tags" name="tags" :options="tags" label="Tags" :delimiters="['Comma', 'Space', 'Semicolon']" />
-    <ui-field type="select" name="select" :options="tags" />
-    <ui-field type="text" name="range" label="Range" />
+    <ui-field type="time" name="time" label="Time" :military="military" />
+    <ui-field type="checkbox" name="toggle" label="24 hour" @check="check => { military = check }" />
     <ui-submit label="Send" noisy="true" />
   </ui-form>
 </template>
@@ -12,6 +11,7 @@ export default {
   name: 'App',
   data () {
     return {
+      military: false,
       badge: {
         type: 'error',
         message: 'Test message',
