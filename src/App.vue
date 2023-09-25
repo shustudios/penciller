@@ -1,6 +1,6 @@
 <template>
   <ui-form @submit="handleSubmit">
-    <ui-field type="time" name="time" label="Time" :military="military" />
+    <ui-field type="date" name="date" :value="date" /><ui-field type="button" name="trigger" label="Test" @click="date = '2023-09-09'" />
     <ui-field type="checkbox" name="toggle" label="24 hour" @check="check => { military = check }" />
     <ui-submit label="Send" noisy="true" />
   </ui-form>
@@ -11,6 +11,7 @@ export default {
   name: 'App',
   data () {
     return {
+      date: '2023-08-07',
       military: false,
       badge: {
         type: 'error',
