@@ -1,8 +1,14 @@
 <template>
   <ui-tabset>
+    <ui-tab label="another" v-if="showTab" :key="tabKey" />
     <ui-tab label="Test" class="test" selected />
-    <ui-tab label="another" />
   </ui-tabset>
+  <ui-field
+    type="button"
+    label="toggle"
+    name="toggle"
+    @click="handleToggle"
+  />
   <ui-form @submit="handleSubmit">
     <ui-progress />
     <ui-field type="color" name="color" :options="['#000000', '#333333', '#666666', '#999999']" />
@@ -25,6 +31,8 @@ export default {
   },
   data () {
     return {
+      showTab: false,
+      tabKey: 1,
       time: { time: '1:02', daytime: 'pm' },
       // time: '3:45am',
       military: false,
@@ -100,6 +108,10 @@ export default {
     },
     handleInput (newValue) {
       this.tasks = newValue
+    },
+    handleToggle () {
+      this.showTab = !this.showTab
+      this.tabKey++
     }
   }
 }
