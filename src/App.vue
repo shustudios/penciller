@@ -1,4 +1,8 @@
 <template>
+  <ui-tabset>
+    <ui-tab label="Test" class="test" selected />
+    <ui-tab label="another" />
+  </ui-tabset>
   <ui-form @submit="handleSubmit">
     <ui-progress />
     <ui-field type="color" name="color" :options="['#000000', '#333333', '#666666', '#999999']" />
@@ -9,10 +13,14 @@
 </template>
 
 <script>
+import UiTabset from '@shustudios/penciller/src/components/ui-tabset/ui-tabset.vue'
+import UiTab from '@shustudios/penciller/src/components/ui-tabset/ui-tab.vue'
 import UiFilter from '@shustudios/penciller/src/components/ui-filter/ui-filter.vue'
 export default {
   name: 'App',
   components: {
+    UiTabset,
+    UiTab,
     UiFilter,
   },
   data () {
