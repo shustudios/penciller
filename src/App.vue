@@ -12,6 +12,7 @@
   <ui-form @submit="handleSubmit">
     <ui-progress />
     <ui-field type="color" name="color" :options="['#000000', '#333333', '#666666', '#999999']" />
+    <ui-field type="select" name="occ" :options="occupations" />
     <ui-filter :options="occupations" :fuse="{ keys:['label', 'value'] }" />
     <ui-field type="checkbox" name="toggle" label="24 hour" @check="check => { military = check }" />
     <ui-submit label="Send" noisy="true" />
@@ -37,7 +38,7 @@ export default {
       // time: '3:45am',
       military: false,
       occupations: [
-        { label: '10010 - Financial managers', value: '10010', keywords: '' },
+        { label: '10010 - Financial managers', value: '10010', keywords: '', css:'--bold' },
         { label: '10011 - Human resources managers', value: '10011', keywords: '' },
         { label: '10012 - Purchasing managers', value: '10012', keywords: '' },
         { label: '10019 - Other administrative services managers', value: '10019', keywords: '' },
@@ -128,5 +129,9 @@ export default {
 
 .ui-field.--daterange {
   max-width: 60rem;
+}
+
+.ui-select-balloon .ui-field-item.--bold {
+  font-weight: 600;
 }
 </style>
