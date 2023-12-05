@@ -25,17 +25,6 @@
       :enabled="open"
       @close="handleCloseBalloon"
     >
-      <!-- <div
-        ref="options"
-        v-for="(option, idx) in localOptions"
-        :key="'option_' + idx"
-        :data-value="option.value"
-        :class="optionClass(option, idx)"
-        @click="handleOptionClick($event, idx)"
-        @mousedown="handleMousedown"
-        @mouseover="handleMouseover"
-        v-html="option.label"
-      /> -->
       <template
         v-for="(option, groupIdx) in localOptions"
       >
@@ -44,9 +33,7 @@
           v-if="option.children"
           :key="'optiongroup_' + groupIdx"
         >
-          <div class="ui-field-itemgroup__label">
-            {{ option.label }}
-          </div>
+          <div class="ui-field-itemgroup__label" v-html="option.label" />
           <div
             ref="options"
             v-for="child in option.children"
@@ -56,9 +43,8 @@
             @click="handleOptionClick($event, child.idx)"
             @mouseover="handleMouseover"
             @mousedown="handleMousedown"
-          >
-          {{ child.label }}
-          </div>
+            v-html="child.label"
+          />
         </div>
 
         <div
@@ -70,9 +56,8 @@
           @click="handleOptionClick($event, option.idx)"
           @mouseover="handleMouseover"
           @mousedown="handleMousedown"
-        >
-          {{ option.label }}
-        </div>
+          v-html="option.label"
+        />
       </template>
     </ui-balloon>
   </div>
