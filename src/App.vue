@@ -40,16 +40,21 @@ export default {
       // time: '3:45am',
       military: false,
       occupations: [
-        { label: '10010 - Financial managers', value: '10010', keywords: '', css:'--bold' },
-        { label: '10011 - Human resources managers', value: '10011', keywords: '' },
-        { label: '10012 - Purchasing managers', value: '10012', keywords: '' },
-        { label: '10019 - Other administrative services managers', value: '10019', keywords: '' },
-        { label: '10020 - Insurance, real estate and financial brokerage managers', value: '10020', keywords: '' },
-        { label: '10021 - Banking, credit and other investment managers', value: '10021', keywords: '' },
-        { label: '10022 - Advertising, marketing and public relations managers', value: '10022', keywords: '' },
-        { label: '10029 - Other business services managers', value: '10029', keywords: '' },
-        { label: '10030 - Telecommunication carriers managers', value: '10030', keywords: '' },
-        { label: '20010 - Engineering managers', value: '20010', keywords: '' },
+        { label: 'Test', children:[
+          { label: 'Child One', value: 'one' }
+        ]},
+        { label: 'Another', children: [
+          { label: '10010 - Financial managers', value: '10010', keywords: '', css:'--bold' },
+          { label: '10011 - Human resources managers', value: '10011', keywords: '' },
+          { label: '10012 - Purchasing managers', value: '10012', keywords: '' },
+          { label: '10019 - Other administrative services managers', value: '10019', keywords: '' },
+          { label: '10020 - Insurance, real estate and financial brokerage managers', value: '10020', keywords: '' },
+          { label: '10021 - Banking, credit and other investment managers', value: '10021', keywords: '' },
+          { label: '10022 - Advertising, marketing and public relations managers', value: '10022', keywords: '' },
+          { label: '10029 - Other business services managers', value: '10029', keywords: '' },
+          { label: '10030 - Telecommunication carriers managers', value: '10030', keywords: '' },
+          { label: '20010 - Engineering managers', value: '20010', keywords: '' },
+        ]},
       ],
       badge: {
         type: 'error',

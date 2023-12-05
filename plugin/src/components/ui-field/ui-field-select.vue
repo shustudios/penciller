@@ -25,7 +25,7 @@
       :enabled="open"
       @close="handleCloseBalloon"
     >
-      <div
+      <!-- <div
         ref="options"
         v-for="(option, idx) in localOptions"
         :key="'option_' + idx"
@@ -35,7 +35,45 @@
         @mousedown="handleMousedown"
         @mouseover="handleMouseover"
         v-html="option.label"
-      />
+      /> -->
+      <template
+        v-for="(option, groupIdx) in localOptions"
+      >
+        <div
+          class="ui-field-itemgroup"
+          v-if="option.children"
+          :key="'optiongroup_' + groupIdx"
+        >
+          <div class="ui-field-itemgroup__label">
+            {{ option.label }}
+          </div>
+          <div
+            ref="options"
+            v-for="child in option.children"
+            :key="'option_' + child.idx"
+            :data-value="child.value"
+            :class="itemClass(child.value, child.idx)"
+            @click="handleOptionClick($event, child.idx)"
+            @mouseover="handleMouseover"
+            @mousedown="handleMousedown"
+          >
+          {{ child.label }}
+          </div>
+        </div>
+
+        <div
+          ref="options"
+          v-else
+          :key="'option_' + option.idx"
+          :data-value="option.value"
+          :class="itemClass(option.value, option.idx)"
+          @click="handleOptionClick($event, option.idx)"
+          @mouseover="handleMouseover"
+          @mousedown="handleMousedown"
+        >
+          {{ option.label }}
+        </div>
+      </template>
     </ui-balloon>
   </div>
 </template>
@@ -76,9 +114,9 @@ export default {
     localLabel: {
       get () {
         let output = '- select -'
-        let optionLabel = this.findOptionLabel(this.localValue)
+        let option = this.getOptionByValue(this.localValue)
 
-        if (optionLabel) { output = optionLabel }
+        if (option) { output = option.label }
         else if (this.placeholder) { output = this.placeholder }
         
         return output
@@ -126,12 +164,34 @@ export default {
       
       this.open = !this.open
     },
+    itemClass (val, idx) {
+      let output = 'ui-field-item'
+
+      if (this.isInSelection(val)) {
+        output += ' --selected'
+      }
+
+      if (this.focused === idx) {
+        output += ' --focused'
+      }
+
+      return output
+    },
     optionClass (option, idx) {
       let output = 'ui-field-item'
 
       if (this.localValue === option.value) { output += ' --selected' }
       if (this.focused === (idx + 1)) { output += ' --focused' }
       if (option.css) { output += ' ' + option.css }
+
+      return output
+    },
+    isInSelection (val) {
+      let output = false
+
+      if (this.localValue.includes(val)) {
+        output = true
+      }
 
       return output
     },
@@ -146,10 +206,10 @@ export default {
       this.idx--
 
       if (this.idx < 0) {
-        this.idx = this.localOptions.length - 1;
+        this.idx = this.$refs.options.length - 1;
       }
 
-      this.focused = this.idx + 1
+      this.focused = this.idx
     },
     nextOption (e) {
       if (this.localDisabled) { return }
@@ -161,42 +221,83 @@ export default {
       e.preventDefault()
       this.idx++
 
-      if (this.idx > this.localOptions.length - 1) {
+      if (this.idx > this.$refs.options.length - 1) {
         this.idx = 0
       }
 
-      this.focused = this.idx + 1
+      this.focused = this.idx
     },
-    selectOption (e) {
-      if (this.localDisabled) { return }
-      e.preventDefault()
+    getOptionByIdx (idx) {
+      let output
 
-      let val = this.localOptions[this.idx].value
-
-      this.open = false
-      this.localLabel = this.localOptions[val]
-      this.$emit('input', val)
-    },
-    findOptionLabel (val) {
-      let output = false
-
-      for (let idx=0; idx<this.localOptions.length; idx++) {
-        if (this.localOptions[idx].value === val) {
-          output = this.localOptions[idx].label
+      for (let itemIdx=0; itemIdx<this.localOptions.length; itemIdx++) {
+        if (this.localOptions[itemIdx].idx === idx) {
+          output = this.localOptions[itemIdx]
           break
+        } else if (this.localOptions[itemIdx].children) {
+          for (let childIdx=0; childIdx<this.localOptions[itemIdx].children.length; childIdx++) {
+            if (this.localOptions[itemIdx].children[childIdx].idx === idx) {
+              output = this.localOptions[itemIdx].children[childIdx]
+              break
+            }
+          }
         }
       }
 
       return output
     },
+    getOptionByValue (val) {
+      let output
+
+      for (let itemIdx=0; itemIdx<this.localOptions.length; itemIdx++) {
+        if (this.localOptions[itemIdx].value === val) {
+          output = this.localOptions[itemIdx]
+          break
+        } else if (this.localOptions[itemIdx].children) {
+          for (let childIdx=0; childIdx<this.localOptions[itemIdx].children.length; childIdx++) {
+            if (this.localOptions[itemIdx].children[childIdx].value === val) {
+              output = this.localOptions[itemIdx].children[childIdx]
+              break
+            }
+          }
+        }
+      }
+
+      return output
+    },
+    selectOption (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      let option = this.getOptionByIdx(this.idx)
+      let val = option.value
+
+      this.open = false
+      this.localLabel = option.label
+      this.$emit('input', val)
+    },
     formatOptions (options) {
       let output = options
+      let count = 0
 
       if (typeof options === 'object' && !Array.isArray(options)) {
         output = []
         
         for (let key in options) {
           output.push({ label: options[key], value: key })
+        }
+      } else {
+
+        for (let itemIdx=0; itemIdx<options.length; itemIdx++) {
+          if (options[itemIdx].children) {
+            for (let childIdx=0; childIdx<options[itemIdx].children.length; childIdx++) {
+              options[itemIdx].children[childIdx].idx = count
+              count++
+            }
+          } else {
+            options[itemIdx].idx = count
+            count++
+          }
         }
       }
 
@@ -250,6 +351,7 @@ export default {
       }
 
       this.nextOption(e)
+      this.$refs.options[this.idx].scrollIntoView(false)
     },
     handleUpKey (e) {
       if (this.localDisabled) { return }
@@ -260,6 +362,7 @@ export default {
       }
 
       this.prevOption(e)
+      this.$refs.options[this.idx].scrollIntoView(false)
     },
     handleOptionClick (e, idx) {
       if (this.localDisabled) { return }
@@ -406,6 +509,32 @@ export default {
 
 .ui-select-balloon .ui-field-item.--focused:before {
   filter: invert(100%);
+}
+
+.ui-select-balloon .ui-field-itemgroup {
+  border-top: solid 0.2rem var(--color-brdr-primary);
+  background-color: var(--color-bg-primary);
+}
+
+.ui-select-balloon .ui-field-itemgroup + .ui-field-item,
+.ui-select-balloon .ui-field-itemgroup .ui-field-itemgroup__label + .ui-field-item {
+  border-top: none;
+}
+
+.ui-select-balloon .ui-field-itemgroup__label {
+  padding: 0.5rem 1rem;
+  outline: none;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-primary);
+  border-bottom: solid 0.2rem var(--color-brdr-primary);
+  font-size: 1.3rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.ui-select-balloon .ui-field-itemgroup__label:after {
+  content: ":";
 }
 
 @media (hover: hover) and (pointer: fine) {
