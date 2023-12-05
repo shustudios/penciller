@@ -1,5 +1,8 @@
+import Fuse from 'fuse.js'
+
 class Utils {
   constructor () {
+    this.fuse = Fuse
   }
 
   clone(obj) {

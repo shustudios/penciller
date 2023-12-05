@@ -81,14 +81,6 @@ export default {
     }
   },
   computed: {
-    localValue: {
-      get () {
-        return this.fieldValue
-      },
-      set (newValue) {
-        return newValue
-      }
-    },
     localDecimal () {
       if (isNaN(this.decimal)) {
         if (!isNaN(this.$attrs.step)) {

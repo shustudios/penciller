@@ -1,5 +1,5 @@
 <template>
-  <ui-tabset>
+  <!-- <ui-tabset>
     <ui-tab label="another" v-if="showTab" :key="tabKey" />
     <ui-tab label="Test" class="test" selected />
   </ui-tabset>
@@ -8,27 +8,29 @@
     label="toggle"
     name="toggle"
     @click="handleToggle"
-  />
-  <ui-form @submit="handleSubmit">
-    <ui-progress />
-    <ui-field type="color" name="color" :options="['#000000', '#333333', '#666666', '#999999']" />
-    <ui-field type="select" name="occ" :options="occupations" />
-    <ui-filter :options="occupations" :fuse="{ keys:['label', 'value'] }" />
-    <ui-field type="checkbox" name="toggle" label="24 hour" @check="check => { military = check }" />
+  /> -->
+  <ui-form ref="form" @submit="handleSubmit">
+    <!-- <ui-progress /> -->
+    <!-- <ui-field type="color" name="color" :options="['#000000', '#333333', '#666666', '#999999']" /> -->
+    <ui-field type="select" name="occ" :options="occupations" value="10011" />
+    <ui-field type="number" name="txt" label="Name" value="2" />
+    <!-- <ui-filter :options="occupations" :fuse="{ keys:['label', 'value'] }" /> -->
+    <!-- <ui-field type="checkbox" name="toggle" label="24 hour" @check="check => { military = check }" /> -->
     <ui-submit label="Send" noisy="true" />
+    <ui-field type="button" name="clear" label="clear" @click="handleClear" />
   </ui-form>
 </template>
 
 <script>
-import UiTabset from '@shustudios/penciller/src/components/ui-tabset/ui-tabset.vue'
-import UiTab from '@shustudios/penciller/src/components/ui-tabset/ui-tab.vue'
-import UiFilter from '@shustudios/penciller/src/components/ui-filter/ui-filter.vue'
+// import UiTabset from '@shustudios/penciller/src/components/ui-tabset/ui-tabset.vue'
+// import UiTab from '@shustudios/penciller/src/components/ui-tabset/ui-tab.vue'
+// import UiFilter from '@shustudios/penciller/src/components/ui-filter/ui-filter.vue'
 export default {
   name: 'App',
   components: {
-    UiTabset,
-    UiTab,
-    UiFilter,
+    // UiTabset,
+    // UiTab,
+    // UiFilter,
   },
   data () {
     return {
@@ -113,6 +115,9 @@ export default {
     handleToggle () {
       this.showTab = !this.showTab
       this.tabKey++
+    },
+    handleClear () {
+      this.$refs.form.reset()
     }
   }
 }

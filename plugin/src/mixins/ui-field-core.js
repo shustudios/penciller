@@ -17,6 +17,7 @@ export default {
       focused: false,
       open: false,
       localChecked: false,
+      defaultValue: this.fieldValue || null,
     }
   },
   computed: {

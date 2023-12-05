@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import Ui from '@shustudios/penciller'
+import Ui from '../plugin/index.js'
 
 const app = createApp(App)
 
