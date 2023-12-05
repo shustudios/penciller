@@ -167,7 +167,7 @@ export default {
     itemClass (val, idx) {
       let output = 'ui-field-item'
 
-      if (this.isInSelection(val)) {
+      if (val === this.localValue) {
         output += ' --selected'
       }
 
@@ -183,15 +183,6 @@ export default {
       if (this.localValue === option.value) { output += ' --selected' }
       if (this.focused === (idx + 1)) { output += ' --focused' }
       if (option.css) { output += ' ' + option.css }
-
-      return output
-    },
-    isInSelection (val) {
-      let output = false
-
-      if (this.localValue.includes(val)) {
-        output = true
-      }
 
       return output
     },
