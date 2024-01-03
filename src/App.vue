@@ -1,36 +1,16 @@
 <template>
-  <!-- <ui-tabset>
-    <ui-tab label="another" v-if="showTab" :key="tabKey" />
-    <ui-tab label="Test" class="test" selected />
-  </ui-tabset>
   <ui-field
-    type="button"
-    label="toggle"
-    name="toggle"
-    @click="handleToggle"
-  /> -->
-  <ui-form ref="form" @submit="handleSubmit">
-    <!-- <ui-progress /> -->
-    <!-- <ui-field type="color" name="color" :options="['#000000', '#333333', '#666666', '#999999']" /> -->
-    <ui-field type="select" name="occ" :options="occupations" />
-    <ui-field type="number" name="txt" label="Name" value="2" />
-    <!-- <ui-filter :options="occupations" :fuse="{ keys:['label', 'value'] }" /> -->
-    <!-- <ui-field type="checkbox" name="toggle" label="24 hour" @check="check => { military = check }" /> -->
-    <ui-submit label="Send" noisy="true" />
-    <ui-field type="button" name="clear" label="clear" @click="handleClear" />
-  </ui-form>
+    type="phone"
+    name="phone"
+    label="Phone"
+    autocomplete="off"
+  />
 </template>
 
 <script>
-// import UiTabset from '@shustudios/penciller/src/components/ui-tabset/ui-tabset.vue'
-// import UiTab from '@shustudios/penciller/src/components/ui-tabset/ui-tab.vue'
-// import UiFilter from '@shustudios/penciller/src/components/ui-filter/ui-filter.vue'
 export default {
   name: 'App',
   components: {
-    // UiTabset,
-    // UiTab,
-    // UiFilter,
   },
   data () {
     return {
@@ -51,6 +31,69 @@ export default {
         { label: '10029 - Other business services managers', value: '10029', keywords: '' },
         { label: '10030 - Telecommunication carriers managers', value: '10030', keywords: '' },
         { label: '20010 - Engineering managers', value: '20010', keywords: '' },
+      ],
+      cityOptions: [
+        { label: 'Airdrie', value: '' },
+        { label: 'Alix', value: '' },
+        { label: 'Andrew', value: '' },
+        { label: 'Athabasca', value: '' },
+        { label: 'Barrhead', value: '' },
+        { label: 'Bashaw', value: '' },
+        { label: 'Bentley', value: '' },
+        { label: 'Blackfalds', value: '' },
+        { label: 'Bow Island', value: '' },
+        { label: 'Calgary', value: '' },
+        { label: 'Coleman', value: '' },
+        { label: 'Delburne', value: '' },
+        { label: 'Devon', value: '' },
+        { label: 'Dewberry', value: '' },
+        { label: 'Drayton Valley', value: '' },
+        { label: 'Edmonton', value: '' },
+        { label: 'Edson', value: '' },
+        { label: 'Elk Point', value: '' },
+        { label: 'Elnora', value: '' },
+        { label: 'Entwistle', value: '' },
+        { label: 'Fairview', value: '' },
+        { label: 'Fort McMurray', value: '' },
+        { label: 'Fort Saskatchewan', value: '' },
+        { label: 'Gibbons', value: '' },
+        { label: 'Grand Cache', value: '' },
+        { label: 'Grand Prairie', value: '' },
+        { label: 'Grimshaw', value: '' },
+        { label: 'High River', value: '' },
+        { label: 'Hinton', value: '' },
+        { label: 'Innisfail', value: '' },
+        { label: 'Jasper', value: '' },
+        { label: 'Lac La Biche', value: '' },
+        { label: 'Lacombe', value: '' },
+        { label: 'Lamont', value: '' },
+        { label: 'Leduc', value: '' },
+        { label: 'Legal', value: '' },
+        { label: 'Lethbridge', value: '' },
+        { label: 'Lloydminister', value: '' },
+        { label: 'Medicine Hat', value: '' },
+        { label: 'Morinville', value: '' },
+        { label: 'Mundare', value: '' },
+        { label: 'Okotoks', value: '' },
+        { label: 'Plamondon', value: '' },
+        { label: 'Ponoka', value: '' },
+        { label: 'Provost', value: '' },
+        { label: 'Red Deer', value: '' },
+        { label: 'Redcliff', value: '' },
+        { label: 'Rimbey', value: '' },
+        { label: 'Sangudo', value: '' },
+        { label: 'Sherwood Park', value: '' },
+        { label: 'Slave Lake', value: '' },
+        { label: 'Spruce Grove', value: '' },
+        { label: 'St. Albert', value: '' },
+        { label: 'St. Paul', value: '' },
+        { label: 'Stony Plain', value: '' },
+        { label: 'Sylvan Lake', value: '' },
+        { label: 'Three Hills', value: '' },
+        { label: 'Tsuut\'ina', value: '' },
+        { label: 'Wabamun', value: '' },
+        { label: 'Westlock', value: '' },
+        { label: 'Whitecourt', value: '' },
       ],
       badge: {
         type: 'error',

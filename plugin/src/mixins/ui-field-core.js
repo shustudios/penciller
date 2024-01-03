@@ -157,7 +157,7 @@ export default {
         switch (format) {
           case 'phone':
           case 'date':
-            output = str.replace(/-/g, '')
+            output = str.replace(/\D/g, '')
             break
 
           case 'hex':

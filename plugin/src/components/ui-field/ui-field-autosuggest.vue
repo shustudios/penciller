@@ -184,7 +184,7 @@ export default {
     optionClass (val, idx) {
       let output = 'ui-field-item'
 
-      if (this.localValue && this.localValue.value === val) {
+      if (this.localValue && this.localValue.value === val && val !== '') {
         output += ' --selected'
       }
 
@@ -367,9 +367,11 @@ export default {
         this.localTabIndex = this.tabindex
         this.focused = false
 
-        setTimeout(() => {
-          this.open = false
-        }, Number(this.autoOpenDelay))
+        if (this.autoOpen) {
+          setTimeout(() => {
+            this.open = false
+          }, Number(this.autoOpenDelay))
+        }
     },
   },
 }
