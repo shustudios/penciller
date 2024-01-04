@@ -31,7 +31,6 @@ export default {
   name: 'ui-field-radio',
   inheritAttrs: false,
   props: {
-    style: Object,
     form: Object,
     fieldValue: String,
     name: String,

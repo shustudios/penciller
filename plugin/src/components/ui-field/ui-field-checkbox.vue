@@ -24,7 +24,6 @@ export default {
   name: 'ui-field-checkbox',
   inheritAttrs: false,
   props: {
-    style: Object,
     form: Object,
     fieldValue: String,
     name: String,

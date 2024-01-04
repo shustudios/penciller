@@ -28,7 +28,6 @@ export default {
   name: 'ui-field-textarea',
   inheritAttrs: false,
   props: {
-    style: Object,
     form: Object,
     fieldValue: String,
     name: String,

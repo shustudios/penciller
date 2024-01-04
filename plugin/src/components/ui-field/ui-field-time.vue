@@ -86,7 +86,6 @@ export default {
   name: 'ui-time',
   inheritAttrs: false,
   props: {
-    style: Object,
     form: Object,
     fieldValue: [String, Object],
     name: String,

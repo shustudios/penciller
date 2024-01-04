@@ -50,7 +50,6 @@ export default {
   name: 'ui-field-date',
   inheritAttrs: false,
   props: {
-    style: Object,
     form: Object,
     fieldValue: String,
     name: String,

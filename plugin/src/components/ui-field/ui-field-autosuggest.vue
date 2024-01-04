@@ -63,7 +63,6 @@ export default {
     UiBalloon,
   },
   props: {
-    style: Object,
     form: Object,
     name: String,
     container: null,

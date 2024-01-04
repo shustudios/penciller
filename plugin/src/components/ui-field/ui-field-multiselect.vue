@@ -56,7 +56,6 @@ export default {
   name: 'ui-field-multiselect',
   inheritAttrs: false,
   props: {
-    style: Object,
     form: Object,
     fieldValue: Array,
     name: String,

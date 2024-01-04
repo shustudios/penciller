@@ -63,7 +63,6 @@ export default {
   name: 'ui-field-color',
   inheritAttrs: false,
   props: {
-    style: Object,
     form: Object,
     fieldValue: String,
     name: String,

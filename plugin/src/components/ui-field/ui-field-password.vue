@@ -32,7 +32,6 @@ export default {
   name: 'ui-field-password',
   inheritAttrs: false,
   props: {
-    style: Object,
     form: Object,
     fieldValue: String,
     name: String,

@@ -32,7 +32,6 @@ export default {
   name: 'ui-field-text',
   inheritAttrs: false,
   props: {
-    style: Object,
     form: Object,
     fieldValue: [String, Number],
     name: String,

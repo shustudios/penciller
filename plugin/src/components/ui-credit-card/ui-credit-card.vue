@@ -37,7 +37,6 @@ export default {
     UiField,
   },
   props: {
-    style: Object,
     name: String,
     autocomplete: String,
     stripe: Object,

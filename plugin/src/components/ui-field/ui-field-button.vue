@@ -16,7 +16,6 @@ export default {
   inheritAttrs: false,
   emits: ['click'],
   props: {
-    style: Object,
     form: Object,
     name: String,
     disabled: [String, Boolean],

@@ -73,7 +73,6 @@ export default {
   name: 'ui-field-daterange',
   inheritAttrs: false,
   props: {
-    style: Object,
     form: Object,
     fieldValue: Object,
     name: String,

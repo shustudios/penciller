@@ -54,7 +54,6 @@ export default {
   name: 'ui-field-number',
   inheritAttrs: false,
   props: {
-    style: Object,
     form: Object,
     name: String,
     prefix: String,

@@ -78,7 +78,6 @@ export default {
     UiBalloon,
   },
   props: {
-    style: Object,
     form: Object,
     fieldValue: Array,
     options: [Array, Object],
