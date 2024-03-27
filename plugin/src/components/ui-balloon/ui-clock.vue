@@ -4,8 +4,8 @@
     class="ui-clock"
     @click.stop
   >
-    <div ref="face" class="face">
-      <div class="hours">
+    <div ref="face" class="ui-clock-face">
+      <div class="ui-clock-hours">
         <div
           :class="hourClass(item.label)"
           v-for="(item, idx) in hourItems"
@@ -13,12 +13,12 @@
           :style="'top: ' + item.t + 'px; left: ' + item.l + 'px; z-index:1'"
           @click="handleHour(item.label)"
         >
-          <div class="label --sub" :data-label="item.label" v-if="item.sub" />
-          <div class="label" v-else>{{ item.label }}</div>
+          <div class="ui-clock-label --sub" :data-label="item.label" v-if="item.sub" />
+          <div class="ui-clock-label" v-else>{{ item.label }}</div>
         </div>
       </div>
 
-      <div class="minutes">
+      <div class="ui-clock-minutes">
         <div
           :class="minuteClass(item.label)"
           v-for="(item, idx) in minuteItems"
@@ -26,8 +26,8 @@
           :style="'top: ' + item.t + 'px; left: ' + item.l + 'px; transform: rotate(' + ((360/60)*idx) + 'deg);'"
           @click="handleMinute(item.label)"
         >
-          <div class="label --sub" :style="'transform: rotate(-' + ((360/60)*idx) + 'deg);'" :data-label="item.label" v-if="item.sub" />
-          <div class="label" v-else>{{ item.label }}</div>
+          <div class="ui-clock-label --sub" :style="'transform: rotate(-' + ((360/60)*idx) + 'deg);'" :data-label="item.label" v-if="item.sub" />
+          <div class="ui-clock-label" v-else>{{ item.label }}</div>
         </div>
       </div>
     </div>
@@ -110,7 +110,7 @@ export default {
   },
   methods: {
     hourClass (h) {
-      let output = 'hour'
+      let output = 'ui-clock-hour'
       let hour = this.hour
 
       if (!this.military && hour > 12) {
@@ -124,7 +124,7 @@ export default {
       return output
     },
     minuteClass (m) {
-      let output = 'minute'
+      let output = 'ui-clock-minute'
 
       if (this.minute == Number(m) && this.minute !== '') {
         output += ' --selected'
@@ -162,14 +162,14 @@ export default {
   cursor: pointer;
 }
 
-.face {
+.ui-clock-face {
   width: 100%;
   border-radius: 100%;
   counter-increment: hour;
   position: relative;
 }
 
-.hours {
+.ui-clock-hours {
   position: absolute;
   top: calc(50% - 1.5rem);
   left: calc(50% - 1.5rem);
@@ -178,7 +178,7 @@ export default {
   border-radius: 100%;
 }
 
-.hour {
+.ui-clock-hour {
   position: absolute;
   display: flex;
   justify-content: center;
@@ -188,7 +188,7 @@ export default {
   border-radius: 100%;
 }
 
-.minutes {
+.ui-clock-minutes {
   position: absolute;
   top: calc(50% - 1.5rem);
   left: calc(50% - 0.4rem);
@@ -197,7 +197,7 @@ export default {
   border-radius: 100%;
 }
 
-.minute {
+.ui-clock-minute {
   position: absolute;
   display: flex;
   justify-content: center;
@@ -206,7 +206,7 @@ export default {
   height: 3rem;
 }
 
-.label {
+.ui-clock-label {
   font-size: 1.6rem;
   width: 2.6rem;
   height: 2.6rem;
@@ -218,7 +218,7 @@ export default {
   pointer-events: none;
 }
 
-.label.--sub:after {
+.ui-clock-label.--sub:after {
   content: '';
   display: block;
   width: 0.4rem;
@@ -227,35 +227,35 @@ export default {
   border-radius: 100%;
 }
 
-.minute:hover {
+.ui-clock-minute:hover {
   z-index: 2;
 }
 
-.hour.--selected,
-.minute.--selected {
+.ui-clock-hour.--selected,
+.ui-clock-minute.--selected {
   z-index: 99;
 }
 
-.hour.--selected .label,
-.minute.--selected .label {
+.ui-clock-hour.--selected .ui-clock-label,
+.ui-clock-minute.--selected .ui-clock-label {
   background-color: var(--color-bg-secondary);
 }
 
-.hour:hover:not(.--selected),
-.minute:hover:not(.--selected) {
+.ui-clock-hour:hover:not(.--selected),
+.ui-clock-minute:hover:not(.--selected) {
   z-index: 100;
 }
 
-.hour:hover:not(.--selected) .label,
-.minute:hover:not(.--selected) .label {
+.ui-clock-hour:hover:not(.--selected) .ui-clock-label,
+.ui-clock-minute:hover:not(.--selected) .ui-clock-label {
   background-color: var(--hilite-bg-primary);
   color: var(--color-text-inverted);
 }
 
-.hour.--selected .label.--sub:before,
-.minute.--selected .label.--sub:before,
-.hour:hover .label.--sub:before,
-.minute:hover .label.--sub:before {
+.ui-clock-hour.--selected .ui-clock-label.--sub:before,
+.ui-clock-minute.--selected .ui-clock-label.--sub:before,
+.ui-clock-hour:hover .ui-clock-label.--sub:before,
+.ui-clock-minute:hover .ui-clock-label.--sub:before {
   content: attr(data-label);
   width: 2.4rem;
   height: 2.4rem;
@@ -264,10 +264,10 @@ export default {
   align-items: center;
 }
 
-.hour.--selected .label.--sub:after,
-.minute.--selected .label.--sub:after,
-.hour:hover .label.--sub:after,
-.minute:hover .label.--sub:after {
+.ui-clock-hour.--selected .ui-clock-label.--sub:after,
+.ui-clock-minute.--selected .ui-clock-label.--sub:after,
+.ui-clock-hour:hover .ui-clock-label.--sub:after,
+.ui-clock-minute:hover .ui-clock-label.--sub:after {
   display: none;
 }
 </style>

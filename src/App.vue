@@ -1,10 +1,13 @@
 <template>
   <ui-field
-    type="phone"
+    type="time"
     name="phone"
     label="Phone"
     autocomplete="off"
   />
+  <ui-repeater>
+    <div>Hello World</div>
+  </ui-repeater>
 </template>
 
 <script>

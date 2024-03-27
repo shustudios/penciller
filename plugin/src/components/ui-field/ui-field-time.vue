@@ -23,6 +23,7 @@
         @focus="handleInnerFocus"
         @blur="handleInnerBlur"
         @keydown="handleKeyright"
+        @click="handleIcon"
       />
       :
       <input
@@ -39,6 +40,7 @@
         @focus="handleInnerFocus"
         @blur="handleInnerBlur"
         @keydown="handleKeyleft"
+        @click="handleIcon"
       />
       <div
         ref="daytime"
@@ -501,6 +503,8 @@ export default {
       this.focused = false
     },
     handleBlur (e) {
+      if (this.open) { return }
+
       setTimeout(() => {
         let active = document.activeElement
         let ref = this.$refs

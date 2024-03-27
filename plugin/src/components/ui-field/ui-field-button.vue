@@ -69,7 +69,7 @@ export default {
   border-color: var(--dim-brdr-primary);
 }
 
-.ui-field.--button .ui-field__button:active {
+.ui-field.--button .ui-field__button:active:not(:disabled) {
   transition: none;
   border-color: var(--color-active);
   box-shadow: none;
