@@ -287,6 +287,22 @@ export default {
       this.afterMount()
     }
   },
+  beforeUnmount () {
+    if (this.form) { this.form.unRegister(this) }
+
+    if (this.$refs.input) {
+      this.$refs.input.removeEventListener('focus', this.handleFocus)
+      this.$refs.input.removeEventListener('blur', this.handleBlur)
+    }
+
+    if (typeof document === 'object') {
+      document.removeEventListener('click', this.handleBodyClick)
+    }
+
+    if (this.afterDestroy) {
+      this.afterDestroy()
+    }
+  },
   beforeDestroy () {
     if (this.form) { this.form.unRegister(this) }
 

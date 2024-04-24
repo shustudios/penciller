@@ -21,10 +21,11 @@ import UiDialog from '../ui-dialog/ui-dialog.vue';
 export default {
   name: 'ui-form',
   props: {
+    debug: Boolean,
     disabled: [String, Boolean],
     errors: String,
   },
-  emits: ['submit'],
+  emits: ['init', 'submit', 'update'],
   components: {
     UiDialog,
   },
@@ -40,6 +41,7 @@ export default {
       submitComponent: null,
       alerts: 0,
       validator: this.$penciller.validator,
+      formObj: false,
     }
   },
   watch: {
@@ -87,6 +89,11 @@ export default {
         delete this.registry[name]
       }
     },
+    update () {
+      this.$nextTick(() => {
+        this.$emit('update', this.toFormObject(this.getFieldsFromRegistry()))
+      })
+    },
     getTag (component) {
       let output = null
 
@@ -109,22 +116,10 @@ export default {
       this.alerts = 0
 
       let output = false
-      let fields = this.getFieldsFromRegistry()
+      let fields = this.getFieldsFromRegistry(true)
 
       if (this.alerts === 0) {
-        output = {
-          fields: fields,
-          startProcessing: this.startProcessing,
-          endProcessing: this.endProcessing,
-          enable: this.enable,
-          disable: this.disable,
-          reset: this.reset,
-          complete: this.complete,
-          showDialog: this.showDialog,
-          hideDialog: this.hideDialog,
-          submit: this.submitComponent,
-          clearAlerts: this.clearAlerts,
-        }
+        output = this.toFormObject(fields)
       } else {
         if (this.submitComponent) {
           if (this.submitComponent.localNoisy === true) {
@@ -135,10 +130,29 @@ export default {
           }
         }
       }
-
+      
       this.$emit('submit', output, e);
     },
-    getFieldsFromRegistry () {
+    toFormObject (fields) {
+      let output = {
+        fields: fields,
+        values: this.values(fields),
+        startProcessing: this.startProcessing,
+        endProcessing: this.endProcessing,
+        enable: this.enable,
+        disable: this.disable,
+        reset: this.reset,
+        complete: this.complete,
+        showDialog: this.showDialog,
+        hideDialog: this.hideDialog,
+        submit: this.submitComponent,
+        clearAlerts: this.clearAlerts,
+        refresh: this.refresh,
+      }
+
+      return output
+    },
+    getFieldsFromRegistry (includeAlerts) {
       let output = {}
 
       for (let i in this.registry) {
@@ -147,7 +161,7 @@ export default {
         fieldComponent.$parent.localBadge = null
         fieldComponent.$parent.badgeKey++
 
-        if (fieldComponent.rules) {
+        if (includeAlerts && fieldComponent.rules) {
           for (let r=0; r<fieldComponent.rules.length; r++) {
             let rule = fieldComponent.rules[r]
             let message = this.validator.check(rule, fieldComponent)
@@ -157,6 +171,10 @@ export default {
                 type: 'error',
                 message,
               }
+
+              if (this.debug) {
+                console.log('error from:', fieldComponent)
+              }
               
               this.alerts++
               break
@@ -165,6 +183,7 @@ export default {
         }
 
         output[i] = {
+          label: fieldComponent.$parent.label || fieldComponent.label,
           name: fieldComponent.name,
           type: fieldComponent.$parent.type,
           value: fieldComponent.localValue,
@@ -199,6 +218,17 @@ export default {
             }
           }
 
+        }
+      }
+
+      return output
+    },
+    values (fields) {
+      let output = {}
+
+      for (let key in fields) {
+        if (fields[key].type) {
+          output[key] = fields[key].value
         }
       }
 
@@ -274,7 +304,15 @@ export default {
     hideDialog () {
       this.dialogEnabled = false
     },
+    refresh () {
+      this.formObj = this.toFormObject(this.getFieldsFromRegistry())
+      this.$emit('init', this.formObj)
+    }
   },
+  mounted: function () {
+    this.formObj = this.toFormObject(this.getFieldsFromRegistry())
+    this.$emit('init', this.formObj)
+  }
 }
 </script>
 

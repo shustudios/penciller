@@ -4,6 +4,7 @@
       ref="input"
       class="ui-filter__input"
       type="text"
+      autocomplete="off"
       :value="localValue"
       :placeholder="placeholder"
       :name="name"
@@ -114,9 +115,12 @@ export default {
     }
   },
   watch: {
+    value (newValue) {
+      this.localValue = newValue
+    },
     options (newValue) {
       this.count = newValue.length
-    }
+    },
   },
   methods: {
     handleInput (e) {

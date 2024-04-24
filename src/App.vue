@@ -1,10 +1,32 @@
 <template>
-  <ui-field
-    type="time"
-    name="phone"
-    label="Phone"
-    autocomplete="off"
-  />
+  <ui-form
+    @init="handleInit"
+    @update="handleUpdate"
+    @submit="handleSubmit"
+  >
+    <ui-field
+      type="select"
+      label="Select"
+      name="select"
+      :value="selectedTag"
+      :options="cityOptions"
+      @input="newValue => { selectedTag = newValue }"
+    />
+    <ui-field
+      type="text"
+      label="text"
+      name="text"
+      autocomplete="off"
+      :value="textval"
+      :rules="[]"
+      v-if="selectedTag === 'cookies'"
+    />
+    <ui-submit
+      name="submit"
+      label="submit"
+    />
+  </ui-form>
+  <div style="width: 10rem; height:80rem; border: solid 0.1rem red" />
   <ui-repeater>
     <div>Hello World</div>
   </ui-repeater>
@@ -17,11 +39,15 @@ export default {
   },
   data () {
     return {
+      form: null,
       showTab: false,
       tabKey: 1,
+      defaults: '',
+      selectedTag: null,
       time: { time: '1:02', daytime: 'pm' },
       // time: '3:45am',
       military: false,
+      textval: null,
       occupations: [
         { label: 'Child One', value: 'one' },
         { label: '10010 - Financial managers', value: '10010', keywords: '', css:'--bold' },
@@ -149,15 +175,31 @@ export default {
       }
     }
   },
-  methods: {
-    handleSubmit (form) {
-      if (form) {
-        form.startProcessing()
-        console.log('form submitted', form.fields)
+  computed: {
+    changed: function () {
+      let output = false
+
+      if (this.form) {
+        if (JSON.stringify(this.form.values) !== this.defaults) {
+          output = true
+        }
       }
+
+      return output
+    }
+  },
+  methods: {
+    handleInit (form) {
+      this.form = form
     },
-    handleInput (newValue) {
-      this.tasks = newValue
+    handleSubmit (form) {
+      console.log(form)
+    },
+    handleUpdate (form) {
+      this.form = form
+    },
+    handleInput (newValue) {      
+      // this.tasks = newValue
     },
     handleToggle () {
       this.showTab = !this.showTab
@@ -166,6 +208,14 @@ export default {
     handleClear () {
       this.$refs.form.reset()
     }
+  },
+  mounted: function () {
+    this.textval = ''
+
+    this.$nextTick(() => {
+      this.form.refresh()
+      this.defaults = JSON.stringify(this.form.values)
+    })
   }
 }
 </script>

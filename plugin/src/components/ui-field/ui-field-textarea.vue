@@ -7,7 +7,7 @@
       :rows="localRows"
       :disabled="localDisabled"
       :value="localValue"
-      :style="{ resize: (!this.resize || this.resize === 'false') ? 'none' : '' }"
+      :style="resizeStyle"
       @input="handleInput"
       v-bind="$attrs"
     />
@@ -80,6 +80,15 @@ export default {
 
       return output
     },
+    resizeStyle () {
+      let output = { resize: '' }
+
+      if (!this.resize || this.resize === 'false' || this.resize === false) {
+        output.resize = 'none'
+      }
+
+      return output
+    }
   },
   watch: {
     localValue () {

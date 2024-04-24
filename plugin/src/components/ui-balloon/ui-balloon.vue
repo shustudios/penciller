@@ -28,12 +28,10 @@ export default {
   data () {
     return {
       parent: null,
-      timer: null,
       localWidth: '',
       localX: 0,
       localY: 0,
       prevState: {},
-      observer: null,
       direction: '',
     }
   },
@@ -72,10 +70,7 @@ export default {
   watch: {
     enabled (newValue) {
       if (newValue) {
-        this.timer = window.requestAnimationFrame(this.observe);
         document.dispatchEvent(new CustomEvent('ui-close', { detail: this.parent }))
-      } else {
-        window.cancelAnimationFrame(this.timer)
       }
     }
   },
@@ -93,6 +88,8 @@ export default {
         this.prevState = this.parent.getBoundingClientRect()
       }
 
+      window.addEventListener('wheel', this.handleWheel, { passive: false })
+      window.addEventListener('touchmove', this.handleWheel, { passive: false })
       window.addEventListener('scroll', this.handleViewchange)
       window.addEventListener('resize', this.handleViewchange)
     },
@@ -101,17 +98,10 @@ export default {
         this.parent.appendChild(this.$el)
       }
 
+      window.removeEventListener('wheel', this.handleWheel)
+      window.removeEventListener('touchmove', this.handleWheel)
       window.removeEventListener('scroll', this.handleViewchange)
       window.removeEventListener('resize', this.handleViewchange)
-    },
-    observe () {
-      let state = this.parent.getBoundingClientRect()
-
-      if (this.objChanged(state, this.prevState)) {
-        this.$emit('close')
-      }
-
-      this.timer = window.requestAnimationFrame(this.observe);
     },
     updatePosition () {
       if (!this.$el || !this.$el.getBoundingClientRect) { return }
@@ -166,6 +156,16 @@ export default {
       }
 
       return output
+    },
+    handleWheel (e) {
+      if (this.enabled) {
+        if (e.target.closest('.ui-select-balloon')) {
+          return
+        } else {
+          e.preventDefault()
+          e.stopPropagation()
+        }
+      }
     },
     handleViewchange () {
       this.$emit('close')

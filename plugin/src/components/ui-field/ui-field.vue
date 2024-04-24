@@ -1,7 +1,7 @@
 <template>
   <div
     :class="fieldClass"
-    :style="$attrs.style"
+    :style="style"
   >
     <label
       ref="label"
@@ -99,6 +99,7 @@ export default {
     messages: Object,
     disabled: [String, Boolean],
     checked: [String, Boolean],
+    style: [String, Object],
   },
   components: {
     UiBadge,
@@ -122,6 +123,9 @@ export default {
   watch: {
     value (newValue) {
       this.localValue = newValue
+    },
+    localValue () {
+      this.$nextTick(this.updateForm)
     },
     options (newValue) {
       this.localOptions = newValue
@@ -237,6 +241,11 @@ export default {
         input.blur()
       }
     },
+    updateForm () {
+      if (this.localForm) {
+        this.localForm.update()
+      }
+    }
   },
   created () {
     this.$options.dependencies = {
