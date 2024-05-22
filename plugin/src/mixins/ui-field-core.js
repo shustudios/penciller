@@ -86,12 +86,29 @@ export default {
 
       return output
     },
+    preCharCount (str, searchStr, sel) {
+      let arr = str.substring(0, sel).split(searchStr)
+      return arr.length - 1
+    },
     maskValue(str, format, sel) {
       let val = str
       let pos = sel
+      let formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: this.decimal })
 
       if (!this.$penciller.utils.isUndefined(str)) {
         switch (format) {
+          case 'currency':
+            if (val !== '') {
+              let fval = formatter.format(val).replace('$', '')
+              let offset = this.preCharCount(fval, ',', sel)
+
+              pos = sel + offset
+              val = fval
+
+              if (fval.charAt(sel) === ',') { pos++ }
+            }
+            break
+            
           case 'machine':
             val = val.replace(/ /g,'-')
             val = val.replace(/[^a-zA-Z0-9-]/g, '')
@@ -160,6 +177,10 @@ export default {
             output = str.replace(/\D/g, '')
             break
 
+          case 'currency':
+            output = str.replace(/,/g, '')
+            break
+
           case 'hex':
             output = '#' + str
             break
@@ -173,6 +194,15 @@ export default {
       let regex
 
       switch (format) {
+        case 'currency':
+          regex = new RegExp(/^\d{1,3}(,\d{3})*(\.\d{2})?$/)
+          
+          if (regex.test(str)) {
+            output = true
+          }
+
+          break
+
         case 'phone':
           regex = new RegExp(/^[0-9-]+$/g)
 

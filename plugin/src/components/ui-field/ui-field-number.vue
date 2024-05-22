@@ -18,16 +18,16 @@
       v-bind="$attrs"
       v-if="localLocked"
     >
-      {{localValue}}
+      {{ displayValue }}
     </div>
     <input
       ref="input"
       class="ui-field__input"
-      type="number"
+      type="text"
       :step="localStep"
       :name="name"
       :disabled="localDisabled"
-      :value="localValue"
+      :value="displayValue"
       @input="handleInput"
       v-bind="$attrs"
       v-else
@@ -57,6 +57,7 @@ export default {
     form: Object,
     name: String,
     prefix: String,
+    format: String,
     fieldValue: [String, Number],
     decimal: [String, Number],
     disabled: [String, Boolean],
@@ -74,12 +75,26 @@ export default {
       inputInterval: null,
       inputTimer: null,
       alertTimer: null,
-      formatTimer: null,
       incremented: false,
       decremented: false,
+      displayValue: '',
     }
   },
   computed: {
+    localValue: {
+      get () {
+        return this.fieldValue
+      },
+      set (newValue) {
+        if (this.prefix === '$') {
+          let newFormat = this.maskValue(newValue.val, 'currency', newValue.sel)
+          this.displayValue = newFormat.val
+          setTimeout(() => { this.$refs.input.setSelectionRange(newFormat.pos, newFormat.pos)},20)
+        }
+        
+        return newValue.val
+      }
+    },
     localDecimal () {
       if (isNaN(this.decimal)) {
         if (!isNaN(this.$attrs.step)) {
@@ -126,9 +141,15 @@ export default {
       return output
     },
   },
+  watch: {
+    fieldValue: function (newValue) {
+      this.formatDisplay(newValue)
+    }
+  },
   methods: {
     afterMount () {
       this.$refs.body.addEventListener('wheel', this.handleWheel)
+      this.formatDisplay(this.fieldValue)
     },
     afterDestroy () {
       this.$refs.body.removeEventListener('wheel', this.handleWheel)
@@ -137,7 +158,14 @@ export default {
         if(Math.floor(value) === value) return 0
         return value.toString().split(".")[1].length || 0
     },
-    formatDisplay () {
+    formatDisplay (val) {
+      if (this.prefix === '$') {
+        this.displayValue = this.maskValue(val, 'currency', 0).val
+      } else {
+        this.displayValue = val
+      }
+    },
+    formatDecimals () {
       if (this.localDecimal) {
         let remainders = String(this.localValue).split('.')[1]
         
@@ -200,18 +228,32 @@ export default {
 
       }, 1000)
     },
-    applyValue (value) {
+    applyValue (val, sel) {
       this.valid = true
-      this.$emit('input', value)
+      this.localValue = { val, sel }
+      this.$emit('input', Number(val))
     },
     handleInput (e) {
       if (this.localDisabled) { return }
       e.preventDefault()
-      
-      let newValue = this.maskValue(e.currentTarget.value, 'number').val
 
-      this.applyValue(newValue)
-      this.$nextTick(this.validate)
+      let val = this.unmaskValue(e.currentTarget.value, 'currency')
+      let sel = e.currentTarget.selectionStart
+      let unmaskOffset = this.preCharCount(e.currentTarget.value, ',', sel)
+
+      sel = sel - unmaskOffset
+
+      if (!isNaN(Number(val))) {
+        this.applyValue(val, sel)
+        this.$nextTick(this.validate)
+      } else {
+        if (val !== '') {
+          e.currentTarget.value = this.displayValue
+          this.$refs.input.setSelectionRange(sel-1, sel-1)
+        } else {
+          this.$emit('input', null)
+        }
+      }
     },
     handleInputDown (dir) {
       clearTimeout(this.inputTimer)
@@ -238,7 +280,7 @@ export default {
       }
     },
     handleBlur (e) {
-      this.formatDisplay()
+      this.formatDecimals()
       this.focused = false
       this.$emit('blur', e)
     }
