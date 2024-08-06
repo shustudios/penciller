@@ -74,26 +74,17 @@ export default {
     return {
       inputInterval: null,
       inputTimer: null,
+      updateTimer: null,
       alertTimer: null,
       incremented: false,
       decremented: false,
-      displayValue: '',
+      displayValue: null,
+      isUpdating: false,
     }
   },
   computed: {
-    localValue: {
-      get () {
-        return this.fieldValue
-      },
-      set (newValue) {
-        if (this.prefix === '$') {
-          let newFormat = this.maskValue(newValue.val, 'currency', newValue.sel)
-          this.displayValue = newFormat.val
-          setTimeout(() => { this.$refs.input.setSelectionRange(newFormat.pos, newFormat.pos)},20)
-        }
-        
-        return newValue.val
-      }
+    localValue () {
+      return this.fieldValue
     },
     localDecimal () {
       if (isNaN(this.decimal)) {
@@ -142,14 +133,16 @@ export default {
     },
   },
   watch: {
-    fieldValue: function (newValue) {
-      this.formatDisplay(newValue)
+    fieldValue: function () {
+      if (!this.focused || this.isUpdating) {
+        this.formatDisplay()
+      }
     }
   },
   methods: {
     afterMount () {
       this.$refs.body.addEventListener('wheel', this.handleWheel)
-      this.formatDisplay(this.fieldValue)
+      this.formatDisplay()
     },
     afterDestroy () {
       this.$refs.body.removeEventListener('wheel', this.handleWheel)
@@ -158,20 +151,20 @@ export default {
         if(Math.floor(value) === value) return 0
         return value.toString().split(".")[1].length || 0
     },
-    formatDisplay (val) {
+    formatDisplay () {
       if (this.prefix === '$') {
-        this.displayValue = this.maskValue(val, 'currency', 0).val
+        this.displayValue = this.maskValue(this.localValue, 'currency', 0).val
       } else {
-        this.displayValue = val
-      }
-    },
-    formatDecimals () {
-      if (this.localDecimal) {
-        let remainders = String(this.localValue).split('.')[1]
-        
-        if (typeof remainders === 'undefined' || remainders.length !== this.localDecimal) {
-          let formattedValue = Number(this.localValue).toFixed(this.localDecimal)
-          this.applyValue(formattedValue)
+        this.displayValue = this.localValue
+
+        if (this.localDecimal) {
+          let formattedValue = this.localValue
+          let remainders = String(this.localValue).split('.')[1]
+          
+          if (typeof remainders === 'undefined' || remainders.length !== this.localDecimal) {
+            formattedValue = Number(this.localValue).toFixed(this.localDecimal)
+            this.applyValue(formattedValue)
+          }
         }
       }
     },
@@ -185,6 +178,7 @@ export default {
       if (n > this.localMax) { n = Number(this.localMax) }
       if (isNaN(n)) { n = Number(this.localStep) }
 
+      this.inputUpdate()
       this.applyValue(n.toFixed(this.localDecimal))
     },
     decrement () {
@@ -197,7 +191,14 @@ export default {
       if (n < this.localMin) { n = Number(this.localMin) }
       if (isNaN(n)) { n = Number(-this.localStep) }
 
+      this.inputUpdate()
       this.applyValue(n.toFixed(this.localDecimal))
+    },
+    inputUpdate () {
+      this.isUpdating = true
+      this.updateTimer = setTimeout(() => {
+        this.isUpdating = false
+      }, 20)
     },
     inputDown (dir) {
       if (dir === '+') {
@@ -228,22 +229,23 @@ export default {
 
       }, 1000)
     },
-    applyValue (val, sel) {
+    applyValue (val) {
       this.valid = true
-      this.localValue = { val, sel }
       this.$emit('input', Number(val))
     },
     handleInput (e) {
       if (this.localDisabled) { return }
       e.preventDefault()
 
-      let val = this.unmaskValue(e.currentTarget.value, 'currency')
+      let val = e.currentTarget.value
       let sel = e.currentTarget.selectionStart
-      let unmaskOffset = this.preCharCount(e.currentTarget.value, ',', sel)
-
-      sel = sel - unmaskOffset
+      
+      if (this.prefix === '$') {
+        val = this.unmaskValue(val, 'currency')
+      }
 
       if (!isNaN(Number(val))) {
+        this.displayValue = e.currentTarget.value
         this.applyValue(val, sel)
         this.$nextTick(this.validate)
       } else {
@@ -271,6 +273,7 @@ export default {
     },
     handleWheel (e) {
       e.preventDefault()
+      clearTimeout(this.updateTimer)
       
       if (typeof window === 'object') {
         if (this.$refs.input === document.activeElement) {
@@ -280,7 +283,7 @@ export default {
       }
     },
     handleBlur (e) {
-      this.formatDecimals()
+      this.formatDisplay()
       this.focused = false
       this.$emit('blur', e)
     }

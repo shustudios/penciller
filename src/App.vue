@@ -1,45 +1,21 @@
 <template>
-  <ui-form
-    @init="handleInit"
-    @update="handleUpdate"
-    @submit="handleSubmit"
-  >
-    <ui-field
-      type="select"
-      label="Select"
-      name="select"
-      :value="selectedTag"
-      :options="cityOptions"
-      @input="newValue => { selectedTag = newValue }"
-    />
-    <ui-field
-      type="text"
-      label="text"
-      name="text"
-      autocomplete="off"
-      :value="textval"
-      :rules="[]"
-      v-if="selectedTag === 'cookies'"
-    />
-    <ui-submit
-      name="submit"
-      label="submit"
-    />
+  <ui-form>
+    <ui-field type="date" name="date" />
+    <ui-submit label="Submit" name="submit" />
   </ui-form>
-  <div style="width: 10rem; height:80rem; border: solid 0.1rem red" />
-  <ui-repeater>
-    <div>Hello World</div>
-  </ui-repeater>
 </template>
 
 <script>
+import Calculator from './calculator.vue'
 export default {
   name: 'App',
   components: {
+    Calculator,
   },
   data () {
     return {
       form: null,
+      currentTab: null,
       showTab: false,
       tabKey: 1,
       defaults: '',
@@ -189,17 +165,23 @@ export default {
     }
   },
   methods: {
+    testRule (val) {
+      return 'hello'
+    },
     handleInit (form) {
       this.form = form
     },
     handleSubmit (form) {
-      console.log(form)
+      
     },
     handleUpdate (form) {
       this.form = form
     },
-    handleInput (newValue) {      
-      // this.tasks = newValue
+    handleInput (newValue) {
+      console.log('---', newValue)
+      setTimeout(() => {
+        this.$refs.form.triggerSubmit()
+      }, 10)
     },
     handleToggle () {
       this.showTab = !this.showTab
@@ -207,15 +189,22 @@ export default {
     },
     handleClear () {
       this.$refs.form.reset()
+    },
+    handleTab () {
+      console.log('chabg')
+    },
+    isTab (tab) {
+      let output = false
+
+      if (tab === this.currentTab) {
+        output = true
+      }
+
+      return output
     }
   },
   mounted: function () {
-    this.textval = ''
-
-    this.$nextTick(() => {
-      this.form.refresh()
-      this.defaults = JSON.stringify(this.form.values)
-    })
+    this.currentTab = 'gic'
   }
 }
 </script>

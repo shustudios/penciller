@@ -3,24 +3,24 @@ class Validator {
     this.result = {}
     this.dateformat = 'YYYY-MM-DD'
     this.messages = {
-      creditexpiry: 'The date provided in %label% field is not valid.',
-      creditnumber: 'The credit card number provided in %label% field is not valid.',
-      creditcode: 'Please provide a valid security code in %label% field, found on the back of your card.',
-      dateformat: 'The date provided in %label% field is not valid.',
-      dateformats: 'The \'%dir%\' date provided in %label% field is not valid.',
-      dateorder: 'The \'To\' date cannot be after the \'From\' date in %label% field.',
-      daterange: 'The date provided in %label% field is not within the specified range.',
-      dateranges: 'The \'%dir%\' date provided in %label% field is not within the specified range.',
-      email: '%label% field requires a properly formatted email address.',
+      creditexpiry: 'The date provided in this %label% field is not valid.',
+      creditnumber: 'The credit card number provided in this %label% field is not valid.',
+      creditcode: 'Please provide a valid security code in this %label% field, found on the back of your card.',
+      dateformat: 'The date provided in this %label% field is not valid.',
+      dateformats: 'The \'%dir%\' date provided in this %label% field is not valid.',
+      dateorder: 'The \'To\' date cannot be after the \'From\' date in this %label% field.',
+      daterange: 'The date provided in this %label% field is not within the specified range.',
+      dateranges: 'The \'%dir%\' date provided in this %label% field is not within the specified range.',
+      email: 'This %label% field requires a properly formatted email address.',
       min: 'The minimum value allowed is %min%.',
       max:  'The maximum value allowed is %max%.',
-      password: '%label% field requires at least:<br>(8 characters, 1 lowercase, 1 uppercase).',
-      phone: '%label% is in an incorrect format.',
+      password: 'This %label% field requires at least:<br>(8 characters, 1 lowercase, 1 uppercase).',
+      phone: 'This %label% is in an incorrect format.',
       range: 'The provided value is outside of the specified (%min% - %max%) range.',
-      required: 'Please complete %label% field - it is required.',
-      time: 'The time provided in %label% field is not valid.',
-      unique: 'Value for %label% field needs to be unique.',
-      machine: 'Value for %label% can only contain alphanumeric characters and dashes.',
+      required: 'Please complete this %label% field - it is required.',
+      time: 'The time provided in this %label% field is not valid.',
+      unique: 'Value for this %label% field needs to be unique.',
+      machine: 'Value for this %label% can only contain alphanumeric characters and dashes.',
     }
   }
 
@@ -360,7 +360,7 @@ class Validator {
       }
     }
 
-    return this.isEmpty(output)? 'this' : 'the <span class="ui-code">' + output + '</span>';
+    return this.isEmpty(output)? '' : '<span class="ui-code">' + output + '</span>';
   }
 
   capitalize(str) {

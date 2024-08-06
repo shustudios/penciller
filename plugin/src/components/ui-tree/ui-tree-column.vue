@@ -14,6 +14,7 @@
       <ui-tree-node
         ref="nodes"
         :label="node.label"
+        :meta="node.meta"
         :nodeID="node.id"
         :droppedNodeID="inside(node.id)"
         :draggedNodeID="draggedNodeID"

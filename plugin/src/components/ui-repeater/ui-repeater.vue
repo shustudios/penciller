@@ -73,7 +73,7 @@ export default {
         return []
       }
     },
-    template: Object,
+    template: [Object, Array],
     disabled: Boolean,
   },
   components: {

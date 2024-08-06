@@ -156,7 +156,12 @@ export default {
             }
 
             id.push(i)
-            nodes.push({ label: option[i].label, id, alert })
+            nodes.push({
+              label: option[i].label,
+              meta: option[i].meta,
+              id,
+              alert
+            })
           }
         }
       }

@@ -1,6 +1,7 @@
 <template>
   <div
       :class="itemCSS"
+      v-bind="meta"
   >
     <div
       class="ui-tree-label"
@@ -13,7 +14,7 @@
       @dragleave="handleDragout"
       @click="$emit('select')"
     >
-      <span class="ui-tree-label__text">{{ localLabel }}</span>
+      <div class="ui-tree-label__text" v-html="localLabel" />
       <div class="ui-tree-label__btn" @click="$emit('add')" v-if="canAdd" />
       <ui-badge
         v-model="localAlert"
@@ -57,6 +58,7 @@ export default {
     label: String,
     alert: Object,
     editable: Boolean,
+    meta: Object,
   },
   components: {
     UiBadge,

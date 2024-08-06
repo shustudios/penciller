@@ -16,14 +16,24 @@ export default {
   },
   data () {
     return {
-      isSelected: false,
+      isSelected: this.selected,
+      idx: 0,
+    }
+  },
+  watch: {
+    selected: function (newValue) {
+      if (newValue === true) {
+        this.$parent.select(this.idx)
+      }
     }
   },
   beforeUnmount () {
     this.$parent.removeTab(this)
+    this.idx = this.$parent.tabs.length-1
   },
   mounted () {
     this.$parent.tabs.push(this)
+    this.idx = this.$parent.tabs.length-1
   }
 }
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div
     :class="fieldClass"
-    :style="style"
+    :style="fieldStyle"
   >
     <label
       ref="label"
@@ -32,7 +32,7 @@
         :fieldValue="localValue"
         :options="localOptions"
         :checked="localChecked"
-        v-bind="$attrs"
+        v-bind="filteredAttrs"
         v-if="name"
         @input="handleInput"
         @check="handleCheck"
@@ -99,7 +99,6 @@ export default {
     messages: Object,
     disabled: [String, Boolean],
     checked: [String, Boolean],
-    style: [String, Object],
   },
   components: {
     UiBadge,
@@ -156,6 +155,13 @@ export default {
       if (this.$attrs.class) { output += ' ' + this.$attrs.class }
       if (this.type) { output += ' --' + this.type }
       return output
+    },
+    fieldStyle () {
+      return this.$attrs.style
+    },
+    filteredAttrs () {
+      let { style, class: classAttr, ...attrs } = this.$attrs
+      return attrs
     }
   },
   methods: {

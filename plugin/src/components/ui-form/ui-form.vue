@@ -42,6 +42,7 @@ export default {
       alerts: 0,
       validator: this.$penciller.validator,
       formObj: false,
+      autoUpdate: true,
     }
   },
   watch: {
@@ -90,9 +91,13 @@ export default {
       }
     },
     update () {
-      this.$nextTick(() => {
-        this.$emit('update', this.toFormObject(this.getFieldsFromRegistry()))
-      })
+      if (this.autoUpdate) {
+        this.$nextTick(() => {
+          this.$emit('update', this.toFormObject(this.getFieldsFromRegistry()))
+        })
+      }
+
+      this.autoUpdate = true
     },
     getTag (component) {
       let output = null
@@ -110,6 +115,7 @@ export default {
       this._submit(e)
     },
     triggerSubmit () {
+      this.autoUpdate = false
       this._submit()
     },
     _submit (e) {
@@ -131,7 +137,7 @@ export default {
         }
       }
       
-      this.$emit('submit', output, e);
+      this.$emit('submit', output, e)
     },
     toFormObject (fields) {
       let output = {

@@ -78,7 +78,11 @@ export default {
   },
   watch: {
     fieldValue () {
-      this.validate()
+      if (this.localValue.length >= 10) {
+        this.validate()
+      } else {
+        this.valid = true
+      }
     }
   },
   computed: {
@@ -140,7 +144,7 @@ export default {
       this.$parent.localBadge = null
       this.valid = true
 
-      if (this.localValue && this.localValue.length >= 10) {
+      if (this.localValue) {
         msg = this.form.validator.check('date', this)
       }
 
@@ -189,6 +193,8 @@ export default {
       this.focused = false
     },
     handleBlur (e) {
+      this.validate()
+
       if (this.localValue && this.valid) {
         let parts = this.localValue.split('-')
         let date = new Date(Number(parts[0]), Number(parts[1]-1), Number(parts[2]))

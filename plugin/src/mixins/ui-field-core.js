@@ -18,6 +18,7 @@ export default {
       open: false,
       localChecked: false,
       defaultValue: this.fieldValue || null,
+      digits: this.decimal ? this.decimal : 0,
     }
   },
   computed: {
@@ -93,7 +94,7 @@ export default {
     maskValue(str, format, sel) {
       let val = str
       let pos = sel
-      let formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: this.decimal })
+      let formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: this.digits })
 
       if (!this.$penciller.utils.isUndefined(str)) {
         switch (format) {
