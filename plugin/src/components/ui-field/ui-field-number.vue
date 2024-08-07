@@ -57,7 +57,6 @@ export default {
     form: Object,
     name: String,
     prefix: String,
-    format: String,
     fieldValue: [String, Number],
     decimal: [String, Number],
     disabled: [String, Boolean],

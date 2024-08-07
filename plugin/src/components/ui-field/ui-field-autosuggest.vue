@@ -404,6 +404,8 @@ export default {
   min-width: 5rem;
   background-color: transparent;
   width: calc(100% - 4rem);
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .ui-field.--autosuggest .ui-field__input::placeholder {

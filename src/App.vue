@@ -1,6 +1,16 @@
 <template>
-  <ui-form>
-    <ui-field type="date" name="date" />
+  <ui-form @submit="handleSubmit">
+    <ui-repeater
+      :template="{}"
+      :values="reps"
+      :collapsed="[]"
+      reorder="true"
+      min="1"
+      max="5"
+      @update="handleRepeater"
+    >
+      Hellos
+    </ui-repeater>
     <ui-submit label="Submit" name="submit" />
   </ui-form>
 </template>
@@ -14,6 +24,8 @@ export default {
   },
   data () {
     return {
+      reps:[{}],
+      myBadge: { type: 'error', message: 'test' },
       form: null,
       currentTab: null,
       showTab: false,
@@ -165,6 +177,9 @@ export default {
     }
   },
   methods: {
+    handleRepeater (newValue) {
+      this.reps = newValue
+    },
     testRule (val) {
       return 'hello'
     },
@@ -172,7 +187,8 @@ export default {
       this.form = form
     },
     handleSubmit (form) {
-      
+      if (form) {
+      }
     },
     handleUpdate (form) {
       this.form = form
@@ -205,6 +221,7 @@ export default {
   },
   mounted: function () {
     this.currentTab = 'gic'
+    this.myBadge = { type: 'restricted'}
   }
 }
 </script>
