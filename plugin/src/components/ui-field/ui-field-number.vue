@@ -151,7 +151,9 @@ export default {
         return value.toString().split(".")[1].length || 0
     },
     formatDisplay () {
-      if (this.prefix === '$') {
+      let currencies = ['$', '€', '¥', '£']
+
+      if (currencies.includes(this.prefix)) {
         this.displayValue = this.maskValue(this.localValue, 'currency', 0).val
       } else {
         this.displayValue = this.localValue

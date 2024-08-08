@@ -248,11 +248,11 @@ export default {
 }
 
 .ui-filter__items:after {
-  content: 'items';
+  content: ' items';
 }
 
 .ui-filter__items.--singular:after {
-  content: 'item';
+  content: ' item';
 }
 
 @media (hover: hover) and (pointer: fine) {

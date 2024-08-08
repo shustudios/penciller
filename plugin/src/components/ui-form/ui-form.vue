@@ -81,6 +81,10 @@ export default {
         }
       }
 
+      if (component.$parent.localBadge) {
+        component.$props.badge = component.$parent.localBadge
+      }
+
       this.registry[name] = component
     },
     unRegister (component) {
@@ -164,7 +168,7 @@ export default {
       for (let i in this.registry) {
         let fieldComponent = this.registry[i]
 
-        fieldComponent.$parent.localBadge = null
+        fieldComponent.$parent.localBadge = fieldComponent.$parent.badge
         fieldComponent.$parent.badgeKey++
 
         if (includeAlerts && fieldComponent.rules) {

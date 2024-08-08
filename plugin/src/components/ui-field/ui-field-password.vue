@@ -12,9 +12,9 @@
       v-bind="$attrs"
     />
     <a
-      :class="autogenClass"
+      :class="generateClass"
       @click="handleGenerate"
-      v-if="localAutogen"
+      v-if="localGenerate"
     />
     <a
       class="ui-field__icon"
@@ -36,7 +36,7 @@ export default {
     fieldValue: String,
     name: String,
     disabled: [String, Boolean],
-    autogen: [String, Boolean],
+    generate: [String, Boolean],
     maxlength: [ String, Number ],
     mask: {
       type: [String, Boolean],
@@ -59,23 +59,26 @@ export default {
   watch: {
     mask () {
       this.localType = this.getType()
+    },
+    fieldValue () {
+      this.processing = false
     }
   },
   computed: {
-    localAutogen () {
-      return this.$penciller.utils.isTrue(this.autogen)
+    localGenerate () {
+      return this.$penciller.utils.isTrue(this.generate)
     },
     localMask () {
       let output = this.$penciller.utils.isTrue(this.mask)
 
-      if (this.localAutogen) {
+      if (this.localGenerate) {
         output = false
       }
 
       return output
     },
-    autogenClass () {
-      let output = 'ui-field__icon --autogen'
+    generateClass () {
+      let output = 'ui-field__icon --generate'
         
       if (this.processing === true) {
         output += ' --processing'
@@ -104,34 +107,6 @@ export default {
         this.localType = 'password'
       }
     },
-    generateValue () {
-      if (this.localDisabled) { return }
-
-      this.processing = true
-
-      let req = new XMLHttpRequest()
-      req.addEventListener("load", (e) => {
-        let str = e.currentTarget.responseText
-        let count = 0
-        let txt = ''
-        let timer = setInterval(() => {
-          txt += str.substr(count, 1)
-          this.localValue = txt
-          count++
-
-          if (count >= str.length) {
-            clearTimeout(timer)
-            this.$refs.input.focus()
-            this.processing = false
-          }
-        }, 10)
-
-        this.localType = 'text'
-      })
-
-      req.open("GET", this.localAutogen);
-      req.send();
-    },
     handleInput (e) {
       let newValue = e.currentTarget.value
       this.$emit('input', newValue)
@@ -140,7 +115,8 @@ export default {
       if (this.localDisabled) { return }
       e.preventDefault()
 
-      this.generateValue()
+      this.processing = true
+      this.$emit('start')
     },
     handleClick (e) {
       if (this.localDisabled) { return }
@@ -202,7 +178,7 @@ export default {
   opacity: 0.3;
 }
 
-.ui-field.--password .ui-field__icon.--autogen {
+.ui-field.--password .ui-field__icon.--generate {
   background-image: url('../../assets/images/icon-reload.svg');
   transform: rotate(0deg);
 }
@@ -217,7 +193,7 @@ export default {
   margin-right: 0.5rem
 }
 
-.ui-field.--password .ui-field__icon.--autogen.--processing {
+.ui-field.--password .ui-field__icon.--generate.--processing {
   animation: ui-password-processing 2s linear infinite;
   transition: none;
 }
