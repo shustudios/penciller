@@ -250,21 +250,6 @@ export default {
 
       return orig_obj;
     },
-    showBalloon () {
-      this.open = true
-    },
-    hideBalloon () {
-      this.open = false
-    },
-    handleIcon (e) {
-      if (this.localDisabled) { return }
-      e.preventDefault()
-
-      this.toggleBalloon()
-    },
-    handleCloseBalloon () {
-      this.hideBalloon()
-    },
     handleDownKey (e) {
       if (this.localDisabled) { return }
       e.preventDefault()
@@ -277,23 +262,23 @@ export default {
 
       this.prevOption()
     },
-    handleEscapeKey () {
-      this.hideBalloon()
-    },
     handleFocus (e) {
       this.focused = true
+      this.handleLeaveField(e)
       this.$emit('focus', e)
     },
     handleBlur (e) {
       this.focused = false
       this.$emit('blur', e)
     },
-    handleBodyClick () {
-      this.hideBalloon()
+    handleLeaveField (e) {
+      if (window.penciller && window.penciller.events) {
+        window.penciller.events.leaveField(e.target)
+      }
     }
   },
   mounted() {
-    if (this.form) { this.form.register(this) }
+    if (this.form && this.$props.form) { this.form.register(this) }
 
     if (this.$refs.input) {
       if (this.$penciller.utils.isTrue(this.focus) || this.$penciller.utils.isTrue(this.select)) {
@@ -305,14 +290,39 @@ export default {
           
         this.handleFocus()
       }
-      
-      this.$refs.input.addEventListener('focus', this.handleFocus)
-      this.$refs.input.addEventListener('blur', this.handleBlur)
     }
 
     if (typeof document === 'object') {
-      document.addEventListener('click', this.handleBodyClick)
+
+      if (!window.penciller) { window.penciller = { events: {}} }
+      if (!window.penciller.events.leaveField) {
+        document.addEventListener('click', this.handleLeaveField)
+        window.penciller.events.leaveField = (source) => {
+          document.dispatchEvent(new CustomEvent('leave-field', { detail: { source }}))
+        }
+      }
+
+      if (this.handleCloseBalloon) {
+        document.addEventListener('leave-field', (e) => {
+          const getAncestor = (child, parent) => {
+            let elm = child
+
+            while (elm) {
+              if (elm === parent) { return elm }
+              elm = elm.parentElement
+            }
+
+            return null
+          }
+
+          if (getAncestor(e.detail.source, this.$el) !== this.$el) {
+            // console.log('Close balloon for --> ', this.name)
+            this.handleCloseBalloon()
+          }
+        })
+      }
     }
+  
 
     if (this.afterMount) {
       this.afterMount()
@@ -321,13 +331,10 @@ export default {
   beforeUnmount () {
     if (this.form) { this.form.unRegister(this) }
 
-    if (this.$refs.input) {
-      this.$refs.input.removeEventListener('focus', this.handleFocus)
-      this.$refs.input.removeEventListener('blur', this.handleBlur)
-    }
-
     if (typeof document === 'object') {
-      document.removeEventListener('click', this.handleBodyClick)
+      if (this.handleCloseBalloon) {
+        document.removeEventListener('click', this.handleLeaveField)
+      }
     }
 
     if (this.afterDestroy) {
@@ -337,13 +344,10 @@ export default {
   beforeDestroy () {
     if (this.form) { this.form.unRegister(this) }
 
-    if (this.$refs.input) {
-      this.$refs.input.removeEventListener('focus', this.handleFocus)
-      this.$refs.input.removeEventListener('blur', this.handleBlur)
-    }
-
     if (typeof document === 'object') {
-      document.removeEventListener('click', this.handleBodyClick)
+      if (this.handleCloseBalloon) {
+        document.removeEventListener('click', this.handleLeaveField)
+      }
     }
 
     if (this.afterDestroy) {

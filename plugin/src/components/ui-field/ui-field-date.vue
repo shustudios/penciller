@@ -1,13 +1,10 @@
 <template>
   <div
     class="ui-field-innergroup"
-    @click.stop
   >
     <div
       ref="group"
       :class="bodyClass"
-      @keydown.escape="handleEscapeKey"
-      @click="handleClick"
     >
       <input
         ref="input"
@@ -19,18 +16,26 @@
         :disabled="localDisabled"
         :value="localValue"
         v-bind="$attrs"
+        @keydown.escape="handleEscapeKey"
+        @focus="handleFocus"
+        @focusout="handleFocusout"
+        @blur="handleBlur"
         @input="handleInput"
       />
-      <a class="ui-field__icon --calendar" />
+      <a
+        class="ui-field__icon --calendar"
+        @click="handleBalloon"
+      />
     </div>
     <ui-balloon
-      transition="slide"
-      :class="balloonClass"
-      :container="container"
+      ref="balloon"
+      :css="balloonClass"
+      :type="balloon.type"
+      :container="balloon.container"
       :enabled="open"
-      @close="handleCloseBalloon"
     >
       <ui-calendar
+        ref="calendar"
         :value="balloonValue"
         :min="min"
         :max="max"
@@ -51,14 +56,14 @@ export default {
   inheritAttrs: false,
   props: {
     form: Object,
-    fieldValue: String,
     name: String,
-    container: null,
-    min: String,
-    max: String,
+    fieldValue: String,
     disabled: [String, Boolean],
     focus: [String, Boolean],
     select: [String, Boolean],
+    balloon: Object,
+    min: String,
+    max: String,
     rules: {
       type: Array,
       default: () => ['required', 'date']
@@ -114,12 +119,12 @@ export default {
     balloonClass () {
       let output = 'ui-calendar-balloon'
 
-      if (this.open) {
-        output += ' --open'
+      if (this.balloon.css) {
+        output += ' ' + this.balloon.css
       }
 
-      if (this.$attrs.hasOwnProperty('balloonClass')) {
-        output += ' ' + this.$attrs.balloonClass
+      if (this.open) {
+        output += ' --open'
       }
 
       return output
@@ -156,6 +161,30 @@ export default {
         }
       }
     },
+    handleEscapeKey (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (this.open) {
+        this.handleCloseBalloon()
+      }
+    },
+    handleFocusout () {
+      this.validate()
+
+      if (this.localValue && this.valid) {
+        let parts = this.localValue.split('-')
+        let date = new Date(Number(parts[0]), Number(parts[1]-1), Number(parts[2]))
+        let year = String(date.getFullYear())
+        let month = String(date.getMonth() + 1)
+        let day = String(date.getDate())
+
+        if (month < 10) { month = '0' + month }
+        if (day < 10) { day = '0' + day }
+
+        this.$emit('input', year + '-' + month + '-' + day)
+      }
+    },
     handleInput (e) {
       let newValue = this.unmaskValue(e.currentTarget.value, 'date')
       let caret = e.currentTarget.selectionStart
@@ -177,40 +206,30 @@ export default {
         }
       }
     },
+    handleBalloon (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (this.open) {
+        this.handleCloseBalloon()
+      } else {
+        this.handleOpenBalloon()
+      }
+    },
+    handleOpenBalloon () {
+      if (this.localDisabled) { return }
+      this.open = true
+    },
+    handleCloseBalloon () {
+      this.open = false
+    },
     handleBalloonInput (newValue) {
       this.$parent.localBadge = null
       this.valid = true
       this.$emit('input', newValue)
-      this.open = false
-      this.focused = true
+      this.handleCloseBalloon()
+      this.$refs.input.focus()
     },
-    handleClick () {
-      if (this.localDisabled) { return }
-      this.open = !this.open
-    },
-    handleBodyClick () {
-      this.open = false
-      this.focused = false
-    },
-    handleBlur (e) {
-      this.validate()
-
-      if (this.localValue && this.valid) {
-        let parts = this.localValue.split('-')
-        let date = new Date(Number(parts[0]), Number(parts[1]-1), Number(parts[2]))
-        let year = String(date.getFullYear())
-        let month = String(date.getMonth() + 1)
-        let day = String(date.getDate())
-
-        if (month < 10) { month = '0' + month }
-        if (day < 10) { day = '0' + day }
-
-        this.$emit('input', year + '-' + month + '-' + day)
-      }
-
-      this.focused = false
-      this.$emit('blur', e)
-    }
   },
 }
 </script>
@@ -290,15 +309,6 @@ export default {
   background-image: url('../../assets/images/icon-calendar.svg');
 }
 
-.ui-calendar-balloon {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  margin: 0.5rem 0;
-}
-
 .ui-field.--date .trans-enter-active,
 .ui-field.--date .trans-leave-active {
   transition: all 0.2s ease-out;
@@ -307,6 +317,10 @@ export default {
 .ui-field.--date .trans-leave-to {
   opacity: 0;
   transform: translateY(-1rem);
+}
+
+.ui-calendar-balloon .ui-calendar {
+  border: none;
 }
 
 @media (hover: hover) and (pointer: fine) {

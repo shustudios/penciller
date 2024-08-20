@@ -15,16 +15,15 @@
           v-if="localBadge"
           @click="showBadge"
         />
-        <div class="ui-field-menu" @click="toggle">
+        <div class="ui-field-menu" @click="handleBalloon">
           <div class="ui-field__caret" />
         </div>
         <ui-balloon
-          ref="menu"
-          transition="slide"
-          :class="balloonClass"
+          ref="balloon"
+          :css="balloon.css"
+          :type="balloon.type"
           :container="localContainer"
           :enabled="open"
-          @close="open = false"
         >
           <slot />
         </ui-balloon>
@@ -47,6 +46,10 @@ export default {
     badge: Object,
     noisy: [String, Boolean],
     disabled: [String, Boolean],
+    balloon: {
+      type: Object,
+      default: () => { return {}}
+    }
   },
   components: {
     UiBadge,
@@ -107,23 +110,18 @@ export default {
         return newValue
       }
     },
-    balloonClass: {
-      get () {
-        let output = 'ui-split-button-balloon'
+    balloonClass () {
+      let output = 'ui-split-button-balloon'
 
-        if (this.open) {
-            output += ' --open'
-        }
-
-        if (this.$attrs.hasOwnProperty('balloonClass')) {
-          output += ' ' + this.$attrs.balloonClass
-        }
-
-        return output
-      },
-      set (newValue) {
-        return newValue
+      if (this.balloon.css) {
+        output += ' ' + this.balloon.css
       }
+
+      if (this.open) {
+        output += ' --open'
+      }
+
+      return output
     },
   },
   methods: {
@@ -158,15 +156,38 @@ export default {
         }
       }
     },
-    handleBodyClick () {
+    handleBalloon (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+      e.stopPropagation()
+
+      if (this.open) {
+        this.handleCloseBalloon()
+      } else {
+        this.handleOpenBalloon()
+      }
+    },
+    handleOpenBalloon () {
+      if (this.localDisabled) { return }
+      this.open = true
+    },
+    handleCloseBalloon () {
       this.open = false
     },
   },
   mounted () {
-    if (this.form) { this.form.register(this) }
-
     if (typeof document === 'object') {
-      document.addEventListener('click', this.handleBodyClick)
+      document.addEventListener('click', this.handleCloseBalloon)
+    }
+  },
+  beforeUnmount () {
+    if (typeof document === 'object') {
+      document.removeEventListener('click', this.handleCloseBalloon)
+    }
+  },
+  beforeDestroy () {
+    if (typeof document === 'object') {
+      document.removeEventListener('click', this.handleCloseBalloon)
     }
   }
 }
@@ -253,7 +274,7 @@ export default {
   opacity: 1;
 }
 
-.ui-split-button-balloon {
+/* .ui-split-button-balloon {
   position: absolute;
   top: 100%;
   left: 0;
@@ -266,7 +287,7 @@ export default {
   overflow: auto;
   user-select: none;
   max-height: 30rem;
-}
+} */
 
 @media (hover: hover) and (pointer: fine) {
   .ui-field.--split-button .ui-field-body:not(.--disabled):not(.--open):hover {

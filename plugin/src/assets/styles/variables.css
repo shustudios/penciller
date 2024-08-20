@@ -5,6 +5,7 @@
     --shade: rgba(0,0,0,0.05);
     --shade-inverted: rgba(255,255,255,0.1);
     --vellum: rgba(255,255,255,0.8);
+    --vellum-inverted: rgba(0,0,0,0.4);
 
     --pencil-4h: #eee;
     --pencil-2h: #dcdcdc;

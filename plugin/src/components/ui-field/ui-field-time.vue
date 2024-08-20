@@ -1,68 +1,63 @@
 <template>
   <div
     class="ui-field-innergroup"
-    @click.stop
   >
     <div
       ref="group"
       :class="groupClass"
-      :tabindex="localTabIndex"
-      @focus="handleOuterFocus"
     >
       <input
         ref="hour"
         class="ui-field__input --hour"
-        type="text"
+        type="tel"
         autocomplete="off"
         :placeholder="placeholderHour"
         name="hour"
         maxlength="2"
         :disabled="localDisabled"
         :value="formattedHour"
-        @input="handleHourInput"
-        @focus="handleInnerFocus"
-        @blur="handleInnerBlur"
         @keydown="handleKeyright"
-        @click="handleIcon"
+        @focus="handleInnerFocus"
+        @blur="handleBlur"
+        @input="handleHourInput"
       />
       :
       <input
         ref="minute"
         class="ui-field__input --minute"
-        type="text"
+        type="tel"
         autocomplete="off"
         placeholder="00"
         name="minute"
         maxlength="2"
         :disabled="localDisabled"
         :value="minute"
-        @input="handleMinuteInput"
+        @keydown="handleKeyleft"
         @focus="handleInnerFocus"
         @blur="handleInnerBlur"
-        @keydown="handleKeyleft"
-        @click="handleIcon"
+        @input="handleMinuteInput"
       />
       <div
         ref="daytime"
         :class="switchClass"
-        @click="handleDaytimeInput"
+        @keydown.space="handleDaytimeInput"
         @focus="handleInnerFocus"
         @blur="handleInnerBlur"
-        @keydown.space="handleDaytimeInput"
+        @click="handleDaytimeInput"
         tabindex="0"
         v-if="!Boolean(military)"
       >
         <span class="--am" />
         <span class="--pm" />
       </div>
-      <a class="ui-field__icon --clock" @click="handleIcon" />
+      <a class="ui-field__icon --clock" @click="handleBalloon" />
     </div>
     <ui-balloon
-      transition="slide"
-      :class="balloonClass"
-      :container="container"
+      ref="balloon"
+      :css="balloonClass"
+      :type="balloon.type"
+      :container="balloon.container"
       :enabled="open"
-      @close="handleCloseBalloon"
     >
       <ui-clock
         :parent="parentElm"
@@ -89,16 +84,16 @@ export default {
   inheritAttrs: false,
   props: {
     form: Object,
-    fieldValue: [String, Object],
     name: String,
+    fieldValue: [String, Object],
+    disabled: Boolean,
+    focus: [String, Boolean],
+    select: [String, Boolean],
+    balloon: Object,
     hourStep: [String, Number],
     minuteStep: [String, Number],
     numericHours: [String, Boolean],
     military: [String, Boolean],
-    disabled: Boolean,
-    focus: [String, Boolean],
-    select: [String, Boolean],
-    container: null,
     rules: {
       type: Array,
       default: () => ['required', 'time']
@@ -164,12 +159,12 @@ export default {
     balloonClass () {
       let output = 'ui-time-balloon'
 
-      if (this.open) {
-        output += ' --open'
+      if (this.balloon.css) {
+        output += ' ' + this.balloon.css
       }
 
-      if (this.$attrs.hasOwnProperty('balloonClass')) {
-        output += ' ' + this.$attrs.balloonClass
+      if (this.open) {
+        output += ' --open'
       }
 
       return output
@@ -417,6 +412,10 @@ export default {
         daytime: this.daytime,
       }
 
+      if (this.hour !== '' && this.minute !== '') {
+        this.handleCloseBalloon()
+      }
+
       this.$parent.localBadge = null
       this.localValue = output
       this.$emit('input', output)
@@ -469,12 +468,12 @@ export default {
         else { this.daytime = 'am' }
       }
 
-      this.$refs.hour.focus()
+      // this.$refs.hour.focus()
       this.hour = newValue
       this.handleInput()
     },
     handleClockMinute (newValue) {
-      this.$refs.minute.focus()
+      // this.$refs.minute.focus()
       this.minute = newValue
       this.handleInput()
     },
@@ -494,15 +493,36 @@ export default {
         setTimeout(() => { field.setSelectionRange(10, 10)}, 0)
       }
     },
-    handleIcon () {
+    handleBalloon (e) {
       if (this.localDisabled) { return }
-      this.open = !this.open
+      e.preventDefault()
+
+      if (this.open) {
+        this.handleCloseBalloon()
+      } else {
+        this.handleOpenBalloon()
+      }
     },
-    handleBodyClick () {
+    handleOpenBalloon () {
+      if (this.localDisabled) { return }
+      this.open = true
+    },
+    handleCloseBalloon () {
       this.open = false
-      this.focused = false
     },
-    handleBlur (e) {
+    /*handleBlur (e) {
+      if (this.open) {
+        setTimeout(() => {
+          if (!document.activeElement.classList.contains('ui-balloon')) {
+            this.open = false
+          }
+        }, 100)
+      }
+
+      this.focused = false
+      this.$emit('blur', e)
+    },*/
+    /*handleBlur (e) {
       if (this.open) { return }
 
       setTimeout(() => {
@@ -517,7 +537,7 @@ export default {
 
         this.$emit('blur', e)
       }, 100)
-    },
+    },*/
     handleHourWheel (e) {
       e.preventDefault()
       this.handleWheel(e, 'hour')
@@ -576,6 +596,11 @@ export default {
   background-color: var(--color-bg-primary);
   transition: all 0.3s ease-out;
   align-items: center;
+}
+
+.ui-field.--time .ui-field-body.--focused,
+.ui-field.--time .ui-field-body.--open {
+  border-color: var(--dim-brdr-primary);
 }
 
 .ui-field.--time .ui-field__input {
@@ -646,6 +671,11 @@ export default {
   outline: none;
 }
 
+.ui-field.--time .ui-field-switch:focus .--am,
+.ui-field.--time .ui-field-switch:focus .--pm {
+  color: var(--color-text-primary);
+}
+
 .ui-field.--time .ui-field-switch .--am,
 .ui-field.--time .ui-field-switch .--pm {
   padding: 0 0.3rem 0.3rem 0.3rem;
@@ -707,13 +737,8 @@ export default {
   background-image: url('../../assets/images/icon-clock.svg');
 }
 
-.ui-time-balloon {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  margin: 0.5rem 0;
+.ui-time-balloon .ui-clock {
+  border: none;
 }
 
 .ui-field.--time .trans-enter-active,

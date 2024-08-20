@@ -2,7 +2,6 @@
   <div
     ref="clock"
     class="ui-clock"
-    @click.stop
   >
     <div ref="face" class="ui-clock-face">
       <div class="ui-clock-hours">
@@ -142,7 +141,7 @@ export default {
   mounted () {
     if (this.$refs.face) {
       this.$nextTick(() => { // bug fix for observer
-        this.$refs.face.style.paddingBottom = '100%'
+        // this.$refs.face.style.paddingBottom = '100%'
       })
     }
   }
@@ -164,9 +163,12 @@ export default {
 
 .ui-clock-face {
   width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 28rem;
   border-radius: 100%;
   counter-increment: hour;
   position: relative;
+  margin: 0 auto;
 }
 
 .ui-clock-hours {

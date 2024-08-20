@@ -32,6 +32,7 @@
         :fieldValue="localValue"
         :options="localOptions"
         :checked="localChecked"
+        :balloon="localBalloon"
         v-bind="filteredAttrs"
         v-if="name"
         @input="handleInput"
@@ -99,6 +100,10 @@ export default {
     messages: Object,
     disabled: [String, Boolean],
     checked: [String, Boolean],
+    balloon: {
+      type: Object,
+      default: () => { return {}}
+    },
   },
   components: {
     UiBadge,
@@ -117,6 +122,7 @@ export default {
       localMaxlength: this.maxlength || 64,
       localErrors: 'badge',
       localChecked: this.checked,
+      localBalloon: this.balloon,
     }
   },
   watch: {
@@ -144,6 +150,12 @@ export default {
     },
     checked (newValue) {
       this.localChecked = newValue
+    },
+    balloon: {
+      handler: function (newValue) {
+        this.localBalloon = newValue
+      },
+      deep: true
     }
   },
   computed: {

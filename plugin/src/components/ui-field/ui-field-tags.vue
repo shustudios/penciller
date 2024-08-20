@@ -1,12 +1,12 @@
 <template>
   <div
     :class="bodyClass"
-    :tabindex="tabindex"
+    :tabindex="localTabindex"
+    @keydown.escape="handleEscapeKey"
+    @keydown.enter="handleEnterKey"
     @keydown.down="handleDownKey"
     @keydown.up="handleUpKey"
-    @keydown.enter="handleEnterKey"
-    @keydown.escape="handleEscapeKey"
-    @focus="handleFocus"
+    @focus="handleOuterFocus"
   >
     <div
       :class="tagClass(tag)"
@@ -34,34 +34,41 @@
       @input="handleInput"
       @keydown="handleKeydown"
       @keyup="handleKeyup"
-      @focusout="handleBlur"
+      @blur="handleBlur"
+      @focus="handleFocus"
     />
-    <div class="ui-field__icon" @click.stop="handleIcon" />
+    <div
+      class="ui-field__icon"
+      @click="handleBalloon"
+    />
     <ui-balloon
-      ref="menu"
-      transition="slide"
-      :class="balloonClass"
-      :container="localContainer"
+      ref="balloon"
+      :css="balloonClass"
+      :type="balloon.type"
+      :container="balloon.container"
       :enabled="open"
-      @close="handleCloseBalloon"
-      @mousedown="handleMouseDown"
     >
-      <div class="menu-empty" v-if="localResults.length === 0" />
-      <template v-else>
-        <div
-          ref="results"
-          :class="optionClass(result, i)"
-          :key="'result_' + i"
-          @click.stop="handleOptionClick(i)"
-          v-for="(result, i) in this.trimList(localResults)"
-        >
-          <template v-if="format === 'object'">{{result.label}}</template>
-          <template v-else>{{result}}</template>
-        </div>
-        <div :class="overflowClass" v-if="overflow > 0">
-        {{ overflow }}
-        </div>
-      </template>
+      <div
+        ref="menu"
+        class="ui-field-menu"
+      >
+        <div class="menu-empty" v-if="localResults.length === 0" />
+        <template v-else>
+          <div
+            ref="results"
+            :class="itemClass(result, i)"
+            :key="'result_' + i"
+            @click="handleBalloonInput(i)"
+            v-for="(result, i) in this.trimList(localResults)"
+          >
+            <template v-if="format === 'object'">{{result.label}}</template>
+            <template v-else>{{result}}</template>
+          </div>
+          <div :class="overflowClass" v-if="overflow > 0">
+          {{ overflow }}
+          </div>
+        </template>
+      </div>
     </ui-balloon>
   </div>
 </template>
@@ -79,15 +86,15 @@ export default {
   },
   props: {
     form: Object,
+    name: String,
     fieldValue: Array,
     options: [Array, Object],
-    name: String,
-    fuse: Object,
-    locked: [String, Boolean],
-    container: null,
     disabled: [String, Boolean],
     focus: [String, Boolean],
     select: [String, Boolean],
+    balloon: Object,
+    fuse: Object,
+    locked: [String, Boolean],
     delimiters: {
       type: Array,
       default: () => [
@@ -117,9 +124,9 @@ export default {
       selected: [],
       overflow: 0,
       inputValue: '',
-      localOptions: this.formatOptions(this.options),
+      localOptions: this.formatItems(this.options),
       localResults: [],
-      isInMenu: false,
+      localTabindex: this.$attrs.tabindex,
       keycodes: {
         semicolon: 186,
         comma: 188,
@@ -149,6 +156,15 @@ export default {
     localLocked () {
       return this.$penciller.utils.isTrue(this.locked)
     },
+    overflowClass () {
+      let output = 'ui-field__overflow'
+
+      if (this.overflow === 1) {
+        output += ' --singular'
+      }
+
+      return output
+    },
     balloonClass () {
       let output = 'ui-tags-balloon'
 
@@ -162,23 +178,71 @@ export default {
 
       return output
     },
-    overflowClass () {
-      let output = 'ui-field__overflow'
+  },
+  methods: {
+    queryItems (query) {
+      let output = []
+      let fuseOptions = this.extend({
+        threshold: 0.2,
+        keys: ['label'],
+        minMatchCharLength: 1,
+      }, this.fuse, true)
 
-      if (this.overflow === 1) {
-        output += ' --singular'
+      this.handleCloseBalloon()
+      this.overflow = 0
+
+      let dict = new Fuse(this.localOptions, fuseOptions)
+
+      if (dict !== null) {
+        let results = dict.search(query)
+
+        for (let i in results) {
+          output.push(results[i].item)
+        }
+      }
+
+      this.localResults = output
+
+      if (output.length > 0) {
+        this.open = true
+      }
+    },
+    itemClass (result, idx) {
+      let output = 'ui-field-item'
+
+      for (let tagsIdx=0; tagsIdx<this.tags.length; tagsIdx++) {
+        if (this.format === 'object') {
+          if (this.tags[tagsIdx].value === result.value) {
+            output += ' --selected'
+          }
+        } else {
+          if (this.tags[tagsIdx] === result) {
+            output += ' --selected'
+          }
+        }
+      }
+
+      if (this.idx === idx) {
+        output += ' --focused'
       }
 
       return output
-    }
-  },
-  methods: {
+    },
+    tagClass (tag) {
+      let output = 'ui-field-tag'
+
+      if (tag.disabled) {
+        output += ' --disabled'
+      }
+
+      return output
+    },
     valueIndex (val) {
       let output = -1
 
       if (this.format === 'object') {
         for (let itmIdx=0; itmIdx<this.localResults.length; itmIdx++) {
-          if (this.localResults[itmIdx].value === val) {
+          if (this.localResults[itmIdx].label === val) {
             output = itmIdx
             break
           }
@@ -225,7 +289,7 @@ export default {
       }
 
       this.$emit('input', this.tags)
-      this.hideBalloon()
+      this.handleCloseBalloon()
     },
     addFromMenu (item) {
       if (this.localDisabled) { return }
@@ -245,9 +309,9 @@ export default {
       }
 
       this.inputValue = ''
-
       this.$emit('input', this.tags)
-      this.hideBalloon()
+      this.$refs.input.focus()
+      this.handleCloseBalloon()
     },
     alreadyInList (label, val) {
       let output = false
@@ -294,23 +358,7 @@ export default {
 
       this.$emit('input', this.localValue)
     },
-    toggleBalloon () {
-      this.hideBadge()
-      this.localResults = this.formatOptions(this.options)
-      this.open = !this.open
-    },
-    hideBalloon () {
-      this.isInMenu = false
-      this.open = false
-    },
-    selectOption () {
-      if (this.idx > -1) {
-        this.addFromMenu(this.localResults[this.idx])
-      }
-
-      this.hideBalloon()
-    },
-    prevOption () {
+    prevItem () {
       let idx = this.idx - 1
 
       if (idx < 0) { idx = this.$refs.results.length - 1 }
@@ -318,43 +366,13 @@ export default {
 
       this.idx = idx
     },
-    nextOption () {
+    nextItem () {
       let idx = this.idx + 1
 
       if (idx > this.$refs.results.length - 1) { idx = 0 }
       if (idx < 0) { idx = 0 }
 
       this.idx = idx
-    },
-    optionClass (result, idx) {
-      let output = 'ui-field-item'
-
-      for (let tagsIdx=0; tagsIdx<this.tags.length; tagsIdx++) {
-        if (this.format === 'object') {
-          if (this.tags[tagsIdx].value === result.value) {
-            output += ' --selected'
-          }
-        } else {
-          if (this.tags[tagsIdx] === result) {
-            output += ' --selected'
-          }
-        }
-      }
-
-      if (this.idx === idx) {
-        output += ' --focused'
-      }
-
-      return output
-    },
-    tagClass (tag) {
-      let output = 'ui-field-tag'
-
-      if (tag.disabled) {
-        output += ' --disabled'
-      }
-
-      return output
     },
     trimList (results) {
       let output = results
@@ -373,7 +391,12 @@ export default {
 
       return output
     },
-    formatOptions (options) {
+    selectItem () {
+      if (this.idx > -1) {
+        this.addFromMenu(this.localResults[this.idx])
+      }
+    },
+    formatItems (options) {
       let output = options
 
       if (typeof options === 'object' && !Array.isArray(options)) {
@@ -385,68 +408,6 @@ export default {
       }
 
       return output
-    },
-    handleInput (e) {
-      let listener = this.getListener('query')
-
-      if (listener) {
-        this.$emit('query', e.currentTarget.value)
-      } else {
-        this.handleQuery(e.currentTarget.value)
-      }
-    },
-    handleOptionClick (i) {
-      this.addFromMenu(this.localResults[i])
-      this.hideBalloon()
-    },
-    handleQuery (query) {
-      let output = []
-      let fuseOptions = this.extend({
-        threshold: 0.2,
-        keys: ['label'],
-        minMatchCharLength: 1,
-      }, this.fuse, true)
-
-      this.hideBalloon()
-      this.overflow = 0
-      this.inputValue = query
-
-      let dict = new Fuse(this.localOptions, fuseOptions)
-
-      if (dict !== null) {
-        let results = dict.search(query)
-
-        for (let i in results) {
-          output.push(results[i].item)
-        }
-      }
-
-      this.localResults = output
-
-      if (output.length > 0) {
-        this.open = true
-      }
-    },
-    handleCloseTag (e, idx) {
-      if (this.localDisabled) { return }
-      e.preventDefault()
-
-      this.removeTag(idx)
-    },
-    handleMouseDown () {
-      this.isInMenu = true
-    },
-    handleEnterKey (e) {
-      if (this.localDisabled) { return }
-      e.preventDefault()
-
-      if (this.open && this.idx > -1) {
-        this.selectOption()
-      } else {
-        if (this.inputValue !== '') {
-          this.addFromInput(this.inputValue)
-        }
-      }
     },
     handleKeydown (e) {
       if (this.localDisabled) { return }
@@ -466,10 +427,6 @@ export default {
       let val = e.currentTarget.value.slice(0, -1)
       let key = e.code || e.which
 
-      if (key !== 'ArrowDown' && key !== 'ArrowUp') {
-        this.idx = this.valueIndex(e.currentTarget.value)
-      }
-
       for (let deIdx=0; deIdx<this.delimiters.length; deIdx++) {
         let delimiter = this.delimiters[deIdx]
 
@@ -479,21 +436,109 @@ export default {
       }
     },
     handleFocus (e) {
-      if (!this.open) {
-        this.focused = true
-        this.$refs.input.focus()
-        this.$emit('focus', e)
-      }
+      this.focused = true
+      this.$emit('focus', e)
+      this.localTabindex = -1
+    },
+    handleOuterFocus (e) {
+      this.focused = true
+      this.$refs.input.focus()
+      this.$emit('focus', e)
     },
     handleBlur (e) {
-      let val = e.currentTarget.value
+      setTimeout(() => {
+        if (this.inputValue !== '') {
+          this.addFromInput(this.inputValue)
+        }
+      }, 100)
 
-      if (!this.isInMenu && val !== '') {
-        this.addFromInput(val)
-      }
-
+      this.localTabindex = this.$attrs.tabindex
       this.focused = false
       this.$emit('blur', e)
+    },
+    handleDownKey (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (this.open) {
+        this.nextItem(e)
+        this.$refs.results[this.idx].scrollIntoView(false)
+      } else {
+        this.handleOpenBalloon()
+      }
+    },
+    handleUpKey (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (this.open) {
+        this.prevItem(e)
+        this.$refs.results[this.idx].scrollIntoView(false)
+      } else {
+        this.handleOpenBalloon()
+      }
+    },
+    handleEnterKey (e) {
+      if (this.localDisabled === true) { return }
+      e.preventDefault()
+
+      if (this.open && this.idx > -1) {
+        this.selectItem()
+      } else {
+        if (this.inputValue !== '') {
+          this.addFromInput(this.inputValue)
+          this.handleCloseBalloon()
+        }
+      }
+    },
+    handleEscapeKey (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (this.open) {
+        this.handleCloseBalloon()
+      }
+    },
+    handleInput (e) {
+      let label = e.currentTarget.value
+      let listener = this.getListener('query')
+
+      this.inputValue = label
+
+      if (listener) {
+        this.$emit('query', label)
+      } else {
+        this.queryItems(label)
+      }
+    },
+    handleCloseTag (e, idx) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      this.removeTag(idx)
+    },
+    handleBalloon (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (this.open) {
+        this.handleCloseBalloon()
+      } else {
+        this.handleOpenBalloon()
+      }
+    },
+    handleOpenBalloon () {
+      if (this.localDisabled) { return }
+
+      this.localResults = this.formatItems(this.options)
+      this.open = true
+    },
+    handleCloseBalloon () {
+      this.idx = -1
+      this.open = false
+    },
+    handleBalloonInput (i) {
+      this.addFromMenu(this.localResults[i])
     },
   },
 }
@@ -563,22 +608,6 @@ export default {
   border-color: var(--dim-brdr-primary);
 }
 
-.ui-tags-balloon {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  margin: 0.5rem 0;
-  background-color: var(--color-bg-primary);
-  z-index: 1000;
-  border-radius: 0.4rem;
-  border: solid 0.2rem var(--dim-brdr-primary);
-  box-shadow: 0 0.2rem 0.4rem rgba(0,0,0,0.1);
-  overflow: auto;
-  user-select: none;
-  max-height: 26.4rem;
-}
-
 .ui-tags-balloon .menu-empty {
   padding: 3rem;
   text-align: center;
@@ -587,43 +616,6 @@ export default {
 
 .ui-tags-balloon .menu-empty:before {
   content: 'No items.'
-}
-
-.ui-tags-balloon .ui-field-item {
-  padding: 1rem 1rem 1rem 4rem;
-  cursor: pointer;
-  border-top: solid 0.1rem var(--color-brdr-quarternary);
-  outline: none;
-  position: relative;
-  color: var(--color-text-primary);
-}
-
-.ui-tags-balloon .ui-field-item:first-child {
-  border: none;
-}
-
-.ui-tags-balloon .ui-field-item.--focused  {
-  background-color: var(--dim-bg-primary);
-  color: var(--color-text-inverted);
-  border-color: var(--dim-bg-primary);
-}
-
-.ui-tags-balloon .ui-field-item.--focused + .ui-field-item {
-  border-color: var(--dim-bg-primary);
-}
-
-.ui-tags-balloon .ui-field-item.--selected:before {
-  content: '';
-  background-position: 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-image: url('../../assets/images/icon-check.svg');
-  display: block;
-  width: 3rem;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
 }
 
 .ui-tags-balloon .ui-field__overflow {
@@ -684,25 +676,6 @@ export default {
 
   .ui-field.--tags .ui-field-body:not(.--disabled) .ui-field-tag__close:hover {
     opacity: 0.7;
-  }
-
-  .ui-tags-balloon .ui-field-item:hover {
-    background-color: var(--hilite-bg-primary);
-    color: var(--color-text-inverted);
-    border-color: var(--hilite-bg-primary);
-  }
-
-  .ui-tags-balloon .ui-field-item:hover + .ui-field-item {
-    border-color: var(--hilite-bg-primary);
-  }
-
-  .ui-tags-balloon .ui-field-item.--selected.--focused:before,
-  .ui-tags-balloon .ui-field-item.--selected:hover:before {
-    filter: invert(100%);
-  }
-
-  .ui-tags-balloon .ui-field-item.--selected:hover:before {
-    filter: invert(100%);
   }
 }
 </style>

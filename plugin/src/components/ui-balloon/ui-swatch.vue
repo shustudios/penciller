@@ -2,7 +2,6 @@
   <div
     ref="swatch"
     class="ui-swatch"
-    @click.stop
   >
     <div class="ui-swatch-body" v-if="options && options.length > 0">
       <div class="ui-swatch-slots">
@@ -276,11 +275,18 @@ export default {
       } else {
         this.$emit('input', color)
       }
-    }
+    },
+    handleInit () {
+      setTimeout(this.init, 10)
+    },
   },
   mounted () {
     if (typeof window === 'object') {
-      window.addEventListener('resize', this.init)
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', this.handleInit)
+      } else {
+        window.addEventListener('resize', this.handleInit)
+      }
     }
 
     if (this.$refs.sample) {
@@ -289,8 +295,22 @@ export default {
       })
     }
 
-    setTimeout(this.init, 1)
-  }
+    this.handleInit()
+  },
+  beforeUnmount () {
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', this.handleInit)
+    } else {
+      window.removeEventListener('resize', this.handleInit)
+    }
+  },
+  beforeDestroy () {
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', this.handleInit)
+    } else {
+      window.removeEventListener('resize', this.handleInit)
+    }
+  },
 }
 </script>
 <style>
@@ -304,6 +324,7 @@ export default {
   overflow: auto;
   color: var(--color-text-primary);
   height: 16rem;
+  outline: none;
 }
 
 .ui-swatch-slots {

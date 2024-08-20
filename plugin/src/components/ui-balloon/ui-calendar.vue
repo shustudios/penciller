@@ -2,7 +2,6 @@
   <div
     ref="calendar"
     class="ui-calendar"
-    @click.stop
   >
     <div class="ui-shortcut" v-if="shortcut">
       <div class="ui-shortcut-body --month" v-if="shortcut === 'month'">
@@ -136,7 +135,7 @@ export default {
         this.date = this.parseDate(this.value)
       }
 
-      // this.years = this.getYears()
+      this.years = this.getYears()
       this.getMonths(this.date)
     },
     parseDate (value) {
@@ -432,8 +431,8 @@ export default {
       window.addEventListener('resize', this.init)
     }
 
-    this.init()
-    this.years = this.getYears()
+      this.years = this.getYears()
+      this.init()
   }
 }
 </script>
@@ -494,7 +493,6 @@ export default {
   border-radius: 0.4rem;
   border: solid 0.2rem var(--dim-brdr-primary);
   box-shadow: 0.2rem 0.2rem var(--shade);
-  overflow: auto;
   user-select: none;
   overflow: hidden;
   color: var(--color-text-primary);

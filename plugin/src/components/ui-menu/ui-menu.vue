@@ -1,68 +1,51 @@
 <template>
   <div
+    :tabindex="$attrs.tabindex || 0"
     ref="dropdown"
-    :class="bodyClass"
+    class="ui-menu"
     v-bind="$attrs"
+    @keydown.escape="handleEscapeKey"
+    @keydown.enter="handleEnterKey"
+    @keydown.space="handleOpenBalloon"
+    @keydown.down="handleDownKey"
+    @keydown.up="handleUpKey"
+    @focus="handleFocus"
+    @blur="handleBlur"
   >
     <div
-      ref="title"
-      :class="titleClass"
-      :tabindex="tabindex"
+      class="ui-menu-button"
       @click="handleBalloon"
-      @keydown.escape="handleEscapeKey"
-      @keydown.enter="handleEnterKey"
-      @keydown.space="handleOpenBalloon"
-      @keydown.down="handleDownKey"
-      @keydown.up="handleUpKey"
-      @focus="handleFocus"
-      @blur="handleBlur"
+      v-if="$slots.default"
     >
-      <div class="ui-field__titlelabel" v-html="localLabel" />
-      <div class="ui-field__titlecaret" />
+      <slot />
     </div>
+    <div
+      class="ui-menu-button --default"
+      @click="handleBalloon"
+      v-else
+    >...</div>
     <ui-balloon
       ref="balloon"
       :css="balloonClass"
       :type="balloon.type"
-      :container="balloon.container"
+      :local="localPosition"
       :enabled="open"
     >
       <div
         ref="menu"
         class="ui-field-menu"
       >
-        <template v-for="(option, groupIdx) in localOptions">
-          <div
-            class="ui-field-itemgroup"
-            v-if="option.children"
-            :key="'optiongroup_' + groupIdx"
-          >
-            <div class="ui-field-itemgroup__label" v-html="option.label" />
-            <div
-              ref="options"
-              v-for="child in option.children"
-              :key="'option_' + child.idx"
-              :data-value="child.value"
-              :class="itemClass(child.value, child.idx)"
-              @click="handleBalloonInput($event, child.idx)"
-              @mouseover="handleMouseover"
-              @mousedown="handleMousedown"
-              v-html="child.label"
-            />
-          </div>
-
-          <div
-            ref="options"
-            v-else
-            :key="'option_' + option.idx"
-            :data-value="option.value"
-            :class="itemClass(option.value, option.idx)"
-            @click="handleBalloonInput($event, option.idx)"
-            @mouseover="handleMouseover"
-            @mousedown="handleMousedown"
-            v-html="option.label"
-          />
-        </template>
+        <div
+          ref="options"
+          :key="'option_' + optionIdx"
+          :data-value="option.value"
+          :class="itemClass(option.value, optionIdx)"
+          @click="handleBalloonInput($event, optionIdx)"
+          @mouseover="handleMouseover"
+          @mousedown="handleMousedown"
+          v-html="option.label"
+          v-for="(option, optionIdx) in localOptions"
+        />
       </div>
     </ui-balloon>
   </div>
@@ -79,43 +62,32 @@ export default {
     UiBalloon,
   },
   props: {
-    form: Object,
-    name: String,
-    fieldValue: [String, Number],
     options: [Object, Array],
     disabled: [String, Boolean],
-    placeholder: String,
-    balloon: Object,
-    rules: {
-      type: Array,
-      default: () => ['required']
-    }
+    balloon: {
+      type: Object,
+      default: () => { return {}}
+    },
   },
   mixins: [UiFieldCore],
   data () {
     return {
-      inlinestyle: '',
       idx: -1,
-      localOptions: this.formatItems(this.options),
+      localOptions: this.options,
     }
   },
   computed: {
-    localLabel: {
-      get () {
-        let output = '- select -'
-        let option = this.getItemByValue(this.localValue)
+    localPosition () {
+      let output = true
 
-        if (option) { output = option.label }
-        else if (this.placeholder) { output = this.placeholder }
-        
-        return output
-      },
-      set (newValue) {
-        return newValue
+      if (this.balloon.type !== 'dropdown') {
+        output = false
       }
+
+      return output
     },
     balloonClass () {
-      let output = 'ui-select-balloon'
+      let output = 'ui-menu-balloon'
 
       if (this.balloon.css) {
         output += ' ' + this.balloon.css
@@ -127,23 +99,10 @@ export default {
 
       return output
     },
-    titleClass () {
-      let output = 'ui-field__title'
-
-      if (this.$penciller.utils.isUndefined(this.localValue)) {
-        output += ' --placeholder'
-      }
-
-      return output
-    }
   },
   methods: {
     itemClass (val, idx) {
       let output = 'ui-field-item'
-
-      if (val === this.localValue) {
-        output += ' --selected'
-      }
 
       if (this.idx === idx) {
         output += ' --focused'
@@ -228,37 +187,8 @@ export default {
       let option = this.getItemByIdx(this.idx)
       let val = option.value
 
-      this.localLabel = option.label
-      this.$refs.title.focus()
       this.handleCloseBalloon()
       this.$emit('input', val)
-    },
-    formatItems (options) {
-      let output = options
-      let count = 0
-
-      if (typeof options === 'object' && !Array.isArray(options)) {
-        output = []
-        
-        for (let key in options) {
-          output.push({ label: options[key], value: key })
-        }
-      } else {
-
-        for (let itemIdx=0; itemIdx<options.length; itemIdx++) {
-          if (options[itemIdx].children) {
-            for (let childIdx=0; childIdx<options[itemIdx].children.length; childIdx++) {
-              options[itemIdx].children[childIdx].idx = count
-              count++
-            }
-          } else {
-            options[itemIdx].idx = count
-            count++
-          }
-        }
-      }
-
-      return output
     },
     handleMousedown (e) {
       if (this.localDisabled) { return }
@@ -312,10 +242,6 @@ export default {
       if (this.localDisabled) { return }
       e.preventDefault()
 
-      if (this.$penciller.utils.isUndefined(this.fieldValue)) {
-        this.idx = -1
-      }
-
       if (this.open) {
         this.handleCloseBalloon()
       } else {
@@ -324,8 +250,6 @@ export default {
     },
     handleOpenBalloon () {
       if (this.localDisabled) { return }
-
-      this.localOptions = this.formatItems(this.options)
       this.open = true
     },
     handleCloseBalloon () {
@@ -344,68 +268,43 @@ export default {
 </script>
 
 <style>
-.ui-field.--select .ui-field-body {
+.ui-menu {
+  outline: none;
   position: relative;
   user-select: none;
 }
 
-.ui-field.--select .ui-field__title {
-  font-size: 1.6rem;
-  padding: 1rem;
-  border-radius: 0.4rem;
-  border: solid 0.2rem var(--color-brdr-primary);
-  color: var(--color-text-primary);
-  background: var(--color-bg-primary);
-  resize: none;
-  display: block;
-  width: 100%;
-  transition: all 0.3s ease-out;
-  outline: none;
-  cursor: pointer;
-  position: relative;
-}
-
-.ui-field.--select .ui-field__title.--placeholder {
-  color: var(--color-text-tertiary);
-}
-
-.ui-field.--select .ui-field__titlecaret {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 4rem;
-  height: 100%;
-  background: url('../../assets/images/icon-cheveron-down.svg') center center no-repeat;
-  opacity: 0.3;
-  transition: transform 0.2s ease-out;
-}
-
-.ui-field.--select .ui-field-body.--open .ui-field__titlecaret {
-  opacity: 0.7;
-  transform: rotate(180deg);
-}
-
-.ui-field.--select .ui-field-body.--disabled .ui-field__title {
-  cursor: default;
-  opacity: 0.5;
-}
-
-.ui-field.--select .ui-field-body.--open .ui-field__title,
-.ui-field.--select .ui-field-body:not(.--disabled).--focused .ui-field__title  {
+.ui-menu:focus .ui-menu-button {
   border-color: var(--dim-brdr-primary);
 }
 
-.ui-select-balloon .ui-field-menu {
+.ui-menu-button.--default {
+  width: 3.4rem;
+  height: 3.4rem;
+  border: solid 0.2rem var(--color-brdr-primary);
+  border-radius: 100%;
+  text-align: center;
+  cursor: pointer;
+}
+
+.ui-menu-balloon {
   outline: none;
+  width: 24rem;
+}
+
+.ui-menu .ui-balloon-screen.--dropdown {
+  position: absolute;
+  top: 100%;
+  left: auto;
+  width: auto;
+  right: 0;
+  z-index: 1000;
+  user-select: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .ui-field.--select .ui-field-body:not(.--disabled):not(.--focused):hover .ui-field__title {
+  .ui-menu:hover .ui-menu-button.--default {
     border-color: var(--hilite-brdr-primary);
-  }
-
-  .ui-field.--select .ui-field-body:not(.--disabled) .ui-field__titlecaret:hover {
-    opacity: 0.7;
   }
 }
 </style>

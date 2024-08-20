@@ -2,12 +2,11 @@
   <div
     ref="group"
     :class="groupClass"
-    @click.stop
   >
     <div
       ref="fromGroup"
       :class="fromGroupClass"
-      @click="handleClick"
+      @click="handleOpenBalloon"
     >
       <div class="ui-field__prefix" data-prefix="From:" />
       <input
@@ -27,7 +26,7 @@
     <div
       ref="toGroup"
       :class="toGroupClass"
-      @click="handleClick"
+      @click="handleOpenBalloon"
     >
       <div class="ui-field__prefix" data-prefix="To:" />
       <input
@@ -45,11 +44,11 @@
       <a class="ui-field__icon --calendar" />
     </div>
     <ui-balloon
-      transition="slide"
-      :class="balloonClass"
-      :container="container"
+      ref="balloon"
+      :css="balloonClass"
+      :type="balloon.type"
+      :container="balloon.container"
       :enabled="open"
-      @close="open = false"
     >
       <ui-calendar
         type="daterange"
@@ -74,14 +73,14 @@ export default {
   inheritAttrs: false,
   props: {
     form: Object,
-    fieldValue: Object,
     name: String,
-    container: null,
-    min: String,
-    max: String,
+    fieldValue: Object,
     disabled: [String, Boolean],
     focus: [String, Boolean],
     select: [String, Boolean],
+    balloon: Object,
+    min: String,
+    max: String,
     rules: {
       type: Array,
       default: () => ['required', 'daterange']
@@ -250,10 +249,6 @@ export default {
         this.lastFocus = 'from'
       }
     },
-    handleClick () {
-      if (this.localDisabled) { return }
-      this.open = !this.open
-    },
     handleFromFocus (e) {
       this.focused = 'from'
       this.lastFocus = this.focused
@@ -263,6 +258,23 @@ export default {
       this.focused = 'to'
       this.lastFocus = this.focused
       this.$emit('focus', e)
+    },
+    handleBalloon (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (this.open) {
+        this.handleCloseBalloon()
+      } else {
+        this.handleOpenBalloon()
+      }
+    },
+    handleOpenBalloon () {
+      if (this.localDisabled) { return }
+      this.open = true
+    },
+    handleCloseBalloon () {
+      this.open = false
     },
   },
   mounted () {
@@ -396,13 +408,8 @@ export default {
   background-image: url('../../assets/images/icon-calendar.svg');
 }
 
-.ui-daterange-balloon {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  margin: 0.5rem 0;
+.ui-daterange-balloon .ui-calendar {
+  border: none;
 }
 
 @media screen and (max-width: 60rem) {

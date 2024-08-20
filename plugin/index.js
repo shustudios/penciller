@@ -11,6 +11,7 @@ import UiDialog from './src/components/ui-dialog/ui-dialog.vue'
 import UiField from './src/components/ui-field/ui-field.vue'
 import UiFilter from './src/components/ui-filter/ui-filter.vue'
 import UiForm from './src/components/ui-form/ui-form.vue'
+import UiMenu from './src/components/ui-menu/ui-menu.vue'
 import UiProgress from './src/components/ui-progress/ui-progress.vue'
 import UiRepeater from './src/components/ui-repeater/ui-repeater.vue'
 import UiSplitButton from './src/components/ui-split-button/ui-split-button.vue'
@@ -40,6 +41,7 @@ export default {
         Vue.component(prefix + 'Field', UiField)
         Vue.component(prefix + 'Filter', UiFilter)
         Vue.component(prefix + 'Form', UiForm)
+        Vue.component(prefix + 'Menu', UiMenu)
         Vue.component(prefix + 'Progress', UiProgress)
         Vue.component(prefix + 'Repeater', UiRepeater)
         Vue.component(prefix + 'SplitButton', UiSplitButton)

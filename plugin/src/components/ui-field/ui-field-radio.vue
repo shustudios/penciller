@@ -7,6 +7,7 @@
     @keydown.right="handleInputNext"
     @keydown.up="handleInputPrev"
     @keydown.left="handleInputPrev"
+    @focus="handleFocus"
   >
     <div
       ref="options"

@@ -1,13 +1,10 @@
 <template>
   <div
     class="ui-field-innergroup"
-    @click.stop
   >
     <div
       ref="group"
       :class="bodyClass"
-      @keydown.escape="handleEscapeKey"
-      @click="handleClick"
     >
       <div
         class="ui-field__prefix"
@@ -24,11 +21,16 @@
         :disabled="localDisabled"
         :value="localValue"
         v-bind="$attrs"
+        @keydown.escape="handleEscapeKey"
+        @focus="handleFocus"
+        @focusout="handleBlur"
         @input="handleInput"
-        @keydown.enter="handleEnter"
       />
-      <a class="ui-field-icon">
-        <img src="../../assets/images/icon-brush.svg" class="ui-field-icon__fg" />
+      <a
+        class="ui-field-icon"
+        @click="handleBalloon"
+      >
+        <div class="ui-field-icon__fg" />
         <svg class="ui-field-icon__bg" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
             <g id="icon-brush-color" stroke="none" stroke-width="1" fill-rule="evenodd" fill="none">
                 <g id="icon-brush" transform="translate(5.000000, 2.000000)" :fill="previewColor">
@@ -39,13 +41,14 @@
       </a>
     </div>
     <ui-balloon
-      transition="slide"
-      :class="balloonClass"
-      :container="container"
+      ref="balloon"
+      :css="balloonClass"
+      :type="balloon.type"
+      :container="balloon.container"
       :enabled="open"
-      @close="handleCloseBalloon"
     >
       <ui-swatch
+        ref="swatch"
         :value="swatchValue"
         :options="options"
         @input="handleBalloonInput"
@@ -64,13 +67,13 @@ export default {
   inheritAttrs: false,
   props: {
     form: Object,
-    fieldValue: String,
     name: String,
-    container: null,
+    fieldValue: String,
     options: Array,
     disabled: [String, Boolean],
     focus: [String, Boolean],
     select: [String, Boolean],
+    balloon: Object,
     rules: {
       type: Array,
       default: () => ['required']
@@ -91,30 +94,25 @@ export default {
     }
   },
   computed: {
-    localValue: {
-      get () {
-        let output = ''
+    localValue () {
+      let output = ''
 
-        if (this.fieldValue) {
-          output = this.fieldValue
+      if (this.fieldValue) {
+        output = this.fieldValue
 
-          if (output.charAt(0) === '#') {
-            output = output.substring(1)
-          }
-
-          if (!this.isValidFormat('#' + output, 'hex')) {
-            output = ''
-          }
+        if (output.charAt(0) === '#') {
+          output = output.substring(1)
         }
 
-        return output
-      },
-      set (newValue) {
-        return newValue
+        if (!this.isValidFormat('#' + output, 'hex')) {
+          output = ''
+        }
       }
+
+      return output
     },
     localPlaceholder () {
-      let output = '0000FF'
+      let output = 'FF0000'
 
       if (this.$attrs.hasOwnProperty('placeholder')) {
         output = this.$attrs.placeholder
@@ -146,12 +144,12 @@ export default {
     balloonClass () {
       let output = 'ui-color-balloon'
 
-      if (this.open) {
-        output += ' --open'
+      if (this.balloon.css) {
+        output += ' ' + this.balloon.css
       }
 
-      if (this.$attrs.hasOwnProperty('balloonClass')) {
-        output += ' ' + this.$attrs.balloonClass
+      if (this.open) {
+        output += ' --open'
       }
 
       return output
@@ -160,6 +158,10 @@ export default {
   methods: {
     afterMount () {
       this.parentElm = this.$el
+    },
+    handleEscapeKey () {
+      this.open = false
+      this.$refs.input.focus()
     },
     handleInput (e) {
       let newValue = '#' + e.currentTarget.value
@@ -178,25 +180,30 @@ export default {
         }
       }
     },
+    handleBalloon (e) {
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      if (this.open) {
+        this.handleCloseBalloon()
+      } else {
+        this.handleOpenBalloon()
+      }
+    },
+    handleOpenBalloon () {
+      if (this.localDisabled) { return }
+      this.open = true
+    },
+    handleCloseBalloon () {
+      this.open = false
+    },
     handleBalloonInput (newValue) {
       this.$parent.localBadge = null
       this.valid = true
       this.$emit('input', newValue.toUpperCase())
-      this.open = false
-      this.focused = true
+      this.handleCloseBalloon()
+      this.$refs.input.focus()
     },
-    handleClick () {
-      if (this.localDisabled) { return }
-      this.open = !this.open
-    },
-    handleBodyClick () {
-      this.open = false
-      this.focused = false
-    },
-    handleEnter (e) {
-      e.preventDefault()
-      this.open = false
-    }
   },
 }
 </script>
@@ -285,19 +292,15 @@ export default {
 .ui-field.--color .ui-field-icon__fg {
   opacity: 0.4;
   z-index: 2;
+  background: url(../../assets/images/icon-brush.svg) center / 2.4rem no-repeat;
 }
 
 .ui-field.--color .ui-field-icon__bg {
   z-index: 1;
 }
 
-.ui-color-balloon {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  margin: 0.5rem 0;
+.ui-balloon-screen.--dropdown .ui-color-balloon {
+  border: none;
 }
 
 .ui-field.--color .trans-enter-active,
