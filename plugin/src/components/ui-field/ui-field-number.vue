@@ -34,12 +34,16 @@
     />
     <a
       :class="incrementClass"
+      @touchstart.prevent="handleInputDown('+')"
+      @touchend="handleInputUp()"
       @mousedown="handleInputDown('+')"
       @mouseup="handleInputUp()"
       @mouseleave="handleInputUp()"
     />
     <a
       :class="decrementClass"
+      @touchstart.prevent="handleInputDown('-')"
+      @touchend="handleInputUp()"
       @mousedown="handleInputDown('-')"
       @mouseup="handleInputUp()"
       @mouseleave="handleInputUp()"

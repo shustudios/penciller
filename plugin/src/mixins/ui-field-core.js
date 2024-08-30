@@ -297,6 +297,7 @@ export default {
       if (!window.penciller) { window.penciller = { events: {}} }
       if (!window.penciller.events.leaveField) {
         document.addEventListener('click', this.handleLeaveField)
+        window.addEventListener('resize', this.handleLeaveField)
         window.penciller.events.leaveField = (source) => {
           document.dispatchEvent(new CustomEvent('leave-field', { detail: { source }}))
         }
@@ -334,6 +335,7 @@ export default {
     if (typeof document === 'object') {
       if (this.handleCloseBalloon) {
         document.removeEventListener('click', this.handleLeaveField)
+        window.removeEventListener('resize', this.handleLeaveField)
       }
     }
 
@@ -347,6 +349,7 @@ export default {
     if (typeof document === 'object') {
       if (this.handleCloseBalloon) {
         document.removeEventListener('click', this.handleLeaveField)
+        window.removeEventListener('resize', this.handleLeaveField)
       }
     }
 
