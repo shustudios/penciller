@@ -20,6 +20,8 @@ export default {
     name: String,
     disabled: [String, Boolean],
     label: String,
+    balloon: Object,
+    options: [Object, Array],
   },
   mixins: [UiFieldCore],
   computed: {

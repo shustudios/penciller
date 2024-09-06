@@ -133,7 +133,7 @@ export default {
     registerElements () {
       if (!this.$el) { return }
 
-      let parentComponent = this.$parent.$parent.getParentNode(this.nodeID)
+      let parentComponent = this.$parent.getParentNode(this.nodeID)
 
       if (parentComponent) {
         this.nodeElm = this.$el

@@ -61,12 +61,15 @@ export default {
     form: Object,
     name: String,
     prefix: String,
+    label: String,
     fieldValue: [String, Number],
     decimal: [String, Number],
     disabled: [String, Boolean],
     focus: [String, Boolean],
     select: [String, Boolean],
     locked: [String, Boolean],
+    options: [Object, Array],
+    balloon: Object,
     rules: {
       type: Array,
       default: () => ['required', 'number']
@@ -249,17 +252,14 @@ export default {
         val = this.unmaskValue(val, 'currency')
       }
 
-      if (!isNaN(Number(val))) {
-        this.displayValue = e.currentTarget.value
-        this.applyValue(val, sel)
-        this.$nextTick(this.validate)
+      if (isNaN(val) && val !== '') {
+        e.currentTarget.value = this.displayValue
+        this.$refs.input.setSelectionRange(sel-1, sel-1)
       } else {
-        if (val !== '') {
-          e.currentTarget.value = this.displayValue
-          this.$refs.input.setSelectionRange(sel-1, sel-1)
-        } else {
-          this.$emit('input', null)
-        }
+        this.applyValue(val)
+        this.$nextTick(() => {
+          this.$refs.input.setSelectionRange(sel, sel)
+        })
       }
     },
     handleInputDown (dir) {

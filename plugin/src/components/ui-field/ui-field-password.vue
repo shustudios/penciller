@@ -34,16 +34,19 @@ export default {
   props: {
     form: Object,
     fieldValue: String,
+    label: String,
     name: String,
     disabled: [String, Boolean],
     generate: [String, Boolean],
     maxlength: [ String, Number ],
+    options: [Object, Array],
     mask: {
       type: [String, Boolean],
       default: () => true
     },
     focus: [String, Boolean],
     select: [String, Boolean],
+    balloon: Object,
     rules: {
         type: Array,
         default: () => ['required', 'password']

@@ -195,6 +195,15 @@ export default {
       let regex
 
       switch (format) {
+        case 'machine':
+          regex = new RegExp(/[^a-zA-Z0-9-]/g)
+
+          if (regex.test(str)) {
+            output = true
+          }
+
+          break
+
         case 'currency':
           regex = new RegExp(/^\d{1,3}(,\d{3})*(\.\d{2})?$/)
           

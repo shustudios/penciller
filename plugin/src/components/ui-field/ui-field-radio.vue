@@ -35,8 +35,10 @@ export default {
     form: Object,
     fieldValue: String,
     name: String,
+    label: String,
     options: [Object, Array],
     disabled: [String, Boolean],
+    balloon: Object,
     rules: {
       type: Array,
       default: () => ['required']

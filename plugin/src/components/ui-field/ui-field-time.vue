@@ -85,11 +85,13 @@ export default {
   props: {
     form: Object,
     name: String,
+    label: String,
     fieldValue: [String, Object],
     disabled: Boolean,
     focus: [String, Boolean],
     select: [String, Boolean],
     balloon: Object,
+    options: [Object, Array],
     hourStep: [String, Number],
     minuteStep: [String, Number],
     numericHours: [String, Boolean],

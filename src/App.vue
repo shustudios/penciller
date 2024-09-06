@@ -1,63 +1,13 @@
-<template>  
+<template>
   <ui-form id="Form" @submit="handleSubmit">
     <ui-field
-      type="radio"
-      name="transition"
-      label="Display"
-      :value="localTrans"
-      :options="trans"
-      @input="val => localTrans = val"
-      :rules="[]"
+      type="password"
+      name="my-field"
+      label="Field"
+      autocomplete="off"
+      :disabled="disabled"
     />
-    <div class="ui-cols">
-      <ui-field
-        type="autosuggest"
-        name="autosuggest"
-        label="Field 2"
-        :options="options"
-        :rules="[]"
-      />
-      <ui-field
-        type="tags"
-        name="tags"
-        label="Tags"
-        :options="options"
-        :balloon="{ type: localTrans }"
-        :rules="[]"
-      />
-      <ui-menu
-        :options="options"
-        :balloon="{ type: localTrans }"
-        @input="handleInput"
-      />
-    </div>
-    <ui-field
-      type="textarea"
-      label="Textarea"
-      name="textarea"
-    />
-    <div class="ui-cols">
-      <ui-field
-        type="select"
-        name="select"
-        label="Options"
-        :balloon="{ type: localTrans }"
-        :options="options"
-        :rules="[]"
-      />
-      <ui-field
-        type="color"
-        name="color"
-        label="Color"
-        :balloon="{ type: localTrans }"
-        :rules="[]"
-      />
-    </div>
-    <ui-split-button
-      label="Test"
-    >
-      <div style="height: 10rem" />
-    </ui-split-button>
+    <a @click="disabled = !disabled">Toggle</a>
     <ui-submit name="submit" label="Submit" />
   </ui-form>
 </template>
@@ -76,11 +26,7 @@ export default {
         { label: 'Option Seven', value:'op7' },
         { label: 'Option Eight', value:'op8' },
       ],
-      localTrans: 'dropdown',
-      trans: [
-        { label: 'Default', value: 'dropdown' },
-        { label: 'Drawer', value: 'drawer' },
-      ],
+      disabled: true,
     }
   },
   computed: {
@@ -88,12 +34,15 @@ export default {
   methods: {
     handleSubmit: function (form) {
       if (form) {
-        console.log(form.fields)
+        form.startProcessing()
+        form.disable()
+
+        setTimeout(() => {
+          form.endProcessing()
+          console.log(form)
+        }, 3000)
       }
     },
-    handleInput: function (val) {
-      console.log('--->', val)
-    }
   }
 }
 </script>

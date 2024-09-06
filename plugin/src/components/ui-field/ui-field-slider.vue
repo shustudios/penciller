@@ -44,11 +44,14 @@ export default {
   name: 'ui-field-slider',
   props: {
     form: Object,
+    label: String,
     startLabel: String,
     endLabel: String,
     disabled: [String, Boolean],
     fieldValue: Number,
+    options: [Object, Array],
     name: String,
+    balloon:Object,
     presets: {
       type: Array,
       default: () => {

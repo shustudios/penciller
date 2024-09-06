@@ -26,10 +26,12 @@ export default {
   props: {
     form: Object,
     fieldValue: String,
+    options: [Object, Array],
     name: String,
     disabled: [String, Boolean],
     checked: [String, Boolean],
     label: String,
+    balloon: Object,
     rules: {
       type: Array,
       default: () => []

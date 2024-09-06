@@ -28,9 +28,12 @@ export default {
     form: Object,
     fieldValue: String,
     name: String,
+    label: String,
     disabled: [String, Boolean],
     focus: [String, Boolean],
     select: [String, Boolean],
+    options: [Object, Array],
+    balloon: Object,
     placeholder: {
       type: String,
       default: () => '000-000-0000'

@@ -30,11 +30,14 @@ export default {
   inheritAttrs: false,
   props: {
     form: Object,
+    label: String,
     fieldValue: String,
+    options: [Object, Array],
     name: String,
     disabled: [String, Boolean],
     focus: [String, Boolean],
     select: [String, Boolean],
+    balloon: Object,
     rules: {
       type: Array,
       default: () => ['required', 'email']

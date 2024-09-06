@@ -36,10 +36,13 @@ export default {
     fieldValue: [String, Number],
     name: String,
     prefix: String,
+    label: String,
     maxlength: [String, Number],
     disabled: [String, Boolean],
     focus: [String, Boolean],
     select: [String, Boolean],
+    options: [Object, Array],
+    balloon: Object,
     format: String,
     rules: {
       type: Array,
@@ -82,6 +85,7 @@ export default {
 
       if (!this.$penciller.utils.isUndefined(this.format)) {
         newValue = this.maskValue(e.currentTarget.value, this.format).val
+        e.currentTarget.value = newValue
       }
 
       this.$emit('input', newValue)

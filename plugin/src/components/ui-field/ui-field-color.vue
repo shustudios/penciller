@@ -68,6 +68,7 @@ export default {
   props: {
     form: Object,
     name: String,
+    label: String,
     fieldValue: String,
     options: Array,
     disabled: [String, Boolean],

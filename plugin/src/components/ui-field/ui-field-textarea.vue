@@ -30,6 +30,7 @@ export default {
   props: {
     form: Object,
     fieldValue: String,
+    label: String,
     name: String,
     disabled: [String, Boolean],
     focus: [String, Boolean],
@@ -37,6 +38,8 @@ export default {
     autosize: [String, Boolean],
     rows: [String, Number],
     resize: [String, Boolean],
+    options: [Object, Array],
+    balloon: Object,
     rules: {
       type: Array,
       default: () => ['required']

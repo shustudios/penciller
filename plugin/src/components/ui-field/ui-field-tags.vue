@@ -88,6 +88,7 @@ export default {
     form: Object,
     name: String,
     fieldValue: Array,
+    label: String,
     options: [Array, Object],
     disabled: [String, Boolean],
     focus: [String, Boolean],
