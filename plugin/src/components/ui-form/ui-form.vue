@@ -143,10 +143,53 @@ export default {
       
       this.$emit('submit', output, e)
     },
+    collapseFields (fields) {
+      let regex = new RegExp(/\]/g)
+      let output = {}
+
+      for (let key in fields) {
+        if (regex.test(key)) {
+          let keys = key.replace(regex, '').split('[')
+          this.arrayToObject(keys, output, fields[key])
+        } else {
+          output[key] = fields[key]
+        }
+      }
+
+      return output
+    },
+    collapseValues (fields) {
+      let regex = new RegExp(/\]/g)
+      let output = {}
+
+      for (let key in fields) {
+        if (regex.test(key)) {
+          let keys = key.replace(regex, '').split('[')
+          this.arrayToObject(keys, output, fields[key].value)
+        } else {
+          output[key] = fields[key].value
+        }
+      }
+
+      return output
+    },
+    arrayToObject (arr, obj, comp) {
+      let cur = obj
+      arr.forEach((key, idx) => {
+        if (!cur[key]) {
+          if (idx < arr.length-1) {
+            cur[key] = {}
+          } else {
+            cur[key] = comp
+          }
+        }
+        cur = cur[key]
+      })
+    },
     toFormObject (fields) {
       let output = {
-        fields: fields,
-        values: this.values(fields),
+        fields: this.collapseFields(fields),
+        values: this.collapseValues(fields),
         startProcessing: this.startProcessing,
         endProcessing: this.endProcessing,
         enable: this.enable,
@@ -198,47 +241,6 @@ export default {
           type: fieldComponent.$parent.type,
           value: fieldComponent.localValue,
           rules: fieldComponent.rules,
-        }
-      }
-
-      return output
-    },
-    validate () {
-      let output = true
-
-      for (let i in this.registry) {
-        let fieldComponent = this.registry[i]
-
-        fieldComponent.$parent.localBadge = null
-        fieldComponent.$parent.badgeKey++
-
-        if (fieldComponent.rules) {
-          for (let r=0; r<fieldComponent.rules.length; r++) {
-            let rule = fieldComponent.rules[r]
-            let message = this.validator.check(rule, fieldComponent)
-
-            if (message !== null) {
-              fieldComponent.$parent.localBadge = {
-                type: 'error',
-                message,
-              }
-              
-              output = false
-              break
-            }
-          }
-
-        }
-      }
-
-      return output
-    },
-    values (fields) {
-      let output = {}
-
-      for (let key in fields) {
-        if (fields[key].type) {
-          output[key] = fields[key].value
         }
       }
 

@@ -2,14 +2,14 @@
   <div class="ui-collection">
     <table ref="items" class="ui-collection-items" v-if="display === 'table'">
       <thead>
-        <template>
+        <tr>
           <slot
             name="head"
           />
-        </template>
+        </tr>
       </thead>
       <tbody>
-        <template
+        <tr
           v-for="(item, index) in results"
         >
           <slot
@@ -17,7 +17,7 @@
             v-bind="item"
             :idx="index"
           />
-        </template>
+        </tr>
       </tbody>
     </table>
     <div ref="items" class="ui-collection-items" v-else>

@@ -259,6 +259,25 @@ export default {
 
       return orig_obj;
     },
+    _beforeDestroy: function () {
+      if (this.form) { this.form.unRegister(this) }
+
+      if (typeof document === 'object') {
+        if (this.handleCloseBalloon) {
+          document.removeEventListener('click', this.handleLeaveField)
+          window.removeEventListener('resize', this.handleLeaveField)
+
+          let balloonElm = this.$refs.balloon
+          if (balloonElm && balloonElm.$el) {
+            document.body.removeChild(balloonElm.$el)
+          }
+        }
+      }
+
+      if (this.afterDestroy) {
+        this.afterDestroy()
+      }
+    },
     handleDownKey (e) {
       if (this.localDisabled) { return }
       e.preventDefault()
@@ -339,31 +358,9 @@ export default {
     }
   },
   beforeUnmount () {
-    if (this.form) { this.form.unRegister(this) }
-
-    if (typeof document === 'object') {
-      if (this.handleCloseBalloon) {
-        document.removeEventListener('click', this.handleLeaveField)
-        window.removeEventListener('resize', this.handleLeaveField)
-      }
-    }
-
-    if (this.afterDestroy) {
-      this.afterDestroy()
-    }
+    this._beforeDestroy()
   },
   beforeDestroy () {
-    if (this.form) { this.form.unRegister(this) }
-
-    if (typeof document === 'object') {
-      if (this.handleCloseBalloon) {
-        document.removeEventListener('click', this.handleLeaveField)
-        window.removeEventListener('resize', this.handleLeaveField)
-      }
-    }
-
-    if (this.afterDestroy) {
-      this.afterDestroy()
-    }
+    this._beforeDestroy()
   }
 }
