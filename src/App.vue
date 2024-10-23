@@ -11,7 +11,7 @@
       <div class="ui-cols">
         <ui-field
           type="text"
-          :name="'insta[' + inst.idx + '][test][val]'"
+          :name="'inst[' + inst.idx + '][val]'"
           :value="inst.val"
           label="Text"
           @input="val => handleInput('val', val, inst.idx)"
@@ -19,7 +19,7 @@
         />
         <ui-field
           type="select"
-          :name="'inst[' + inst.idx + '][test][sel]'"
+          :name="'inst[' + inst.idx + '][sel]'"
           label="Select"
           :options="options"
           :value="inst.sel"
@@ -28,6 +28,7 @@
         />
       </div>
     </ui-repeater>
+    <ui-field type="text" name="text" label="Text" focus="true" />
     <ui-submit name="submit" label="Submit" />
   </ui-form>
 </template>
@@ -107,7 +108,9 @@ export default {
     },
     handleSubmit: function (form) {
       if (form) {
+        form.startProcessing()
         console.log('--', form)
+        form.endProcessing()
       }
     },
   }

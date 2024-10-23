@@ -41,8 +41,10 @@ export default {
       submitComponent: null,
       alerts: 0,
       validator: this.$penciller.validator,
+      utils: this.$penciller.utils,
       formObj: false,
       autoUpdate: true,
+      bracketRegex: new RegExp(/\]/g),
     }
   },
   watch: {
@@ -85,7 +87,21 @@ export default {
         component.$props.badge = component.$parent.localBadge
       }
 
-      this.registry[name] = component
+      this.utils.addToObject(name, component, this.registry)
+    },
+    arrayToObject (arr, obj, comp) {
+      let cur = obj
+
+      arr.forEach((key, idx) => {
+        if (!cur[key]) {
+          if (idx < arr.length-1) {
+            cur[key] = {}
+          } else {
+            cur[key] = comp
+          }
+        }
+        cur = cur[key]
+      })
     },
     unRegister (component) {
       let name = component.$props.name
@@ -97,7 +113,7 @@ export default {
     update () {
       if (this.autoUpdate) {
         this.$nextTick(() => {
-          this.$emit('update', this.toFormObject(this.getFieldsFromRegistry()))
+          this.$emit('update', this.toFormObject(this.getFieldsFromRegistry(this.registry)))
         })
       }
 
@@ -126,7 +142,7 @@ export default {
       this.alerts = 0
 
       let output = false
-      let fields = this.getFieldsFromRegistry(true)
+      let fields = this.getFieldsFromRegistry(this.registry, true)
 
       if (this.alerts === 0) {
         output = this.toFormObject(fields)
@@ -143,28 +159,12 @@ export default {
       
       this.$emit('submit', output, e)
     },
-    collapseFields (fields) {
-      let regex = new RegExp(/\]/g)
-      let output = {}
-
-      for (let key in fields) {
-        if (regex.test(key)) {
-          let keys = key.replace(regex, '').split('[')
-          this.arrayToObject(keys, output, fields[key])
-        } else {
-          output[key] = fields[key]
-        }
-      }
-
-      return output
-    },
     collapseValues (fields) {
-      let regex = new RegExp(/\]/g)
       let output = {}
 
       for (let key in fields) {
-        if (regex.test(key)) {
-          let keys = key.replace(regex, '').split('[')
+        if (this.bracketRegex.test(key)) {
+          let keys = key.replace(this.bracketRegex, '').split('[')
           this.arrayToObject(keys, output, fields[key].value)
         } else {
           output[key] = fields[key].value
@@ -173,23 +173,36 @@ export default {
 
       return output
     },
-    arrayToObject (arr, obj, comp) {
-      let cur = obj
-      arr.forEach((key, idx) => {
-        if (!cur[key]) {
-          if (idx < arr.length-1) {
-            cur[key] = {}
-          } else {
-            cur[key] = comp
+    outputFields (fields) {
+      for (let i in fields) {
+        if (i !== '__has_fields') {
+          if (fields[i].__has_fields) {
+            delete fields[i].__has_fields
+            this.outputFields(fields[i])
           }
         }
-        cur = cur[key]
-      })
+      }
+    },
+    outputValues (fields) {
+      for (let i in fields) {
+        if (i !== '__has_fields') {
+          if (fields[i].__has_fields) {
+            delete fields[i].__has_fields
+            this.outputValues(fields[i])
+          } else {
+            fields[i] = fields[i].value || undefined
+          }
+        }
+      }
     },
     toFormObject (fields) {
+      let values = this.utils.clone(fields)
+      this.outputValues(values)
+      this.outputFields(fields)
+
       let output = {
-        fields: this.collapseFields(fields),
-        values: this.collapseValues(fields),
+        fields,
+        values,
         startProcessing: this.startProcessing,
         endProcessing: this.endProcessing,
         enable: this.enable,
@@ -205,43 +218,64 @@ export default {
 
       return output
     },
-    getFieldsFromRegistry (includeAlerts) {
-      let output = {}
-
-      for (let i in this.registry) {
-        let fieldComponent = this.registry[i]
-
-        fieldComponent.$parent.localBadge = fieldComponent.$parent.badge
-        fieldComponent.$parent.badgeKey++
-
-        if (includeAlerts && fieldComponent.rules) {
-          for (let r=0; r<fieldComponent.rules.length; r++) {
-            let rule = fieldComponent.rules[r]
-            let message = this.validator.check(rule, fieldComponent)
-
-            if (message !== null) {
-              fieldComponent.$parent.localBadge = {
-                type: 'error',
-                message,
-              }
-
-              if (this.debug) {
-                console.log('error from:', fieldComponent)
-              }
-              
-              this.alerts++
-              break
-            }
+    eachRegisteredField (fields, callback) {
+      for (let field in fields) {
+        if (field !== '__has_fields') {
+          if (fields[field].__has_fields) {
+            this.eachRegisteredField(fields[field], callback)
+          } else {
+            callback(fields[field])
           }
         }
+      }
+    },
+    getFieldsFromRegistry (fields, includeAlerts) {
+      let output = {}
 
-        output[i] = {
-          label: fieldComponent.$parent.label || fieldComponent.label,
-          name: fieldComponent.name,
-          type: fieldComponent.$parent.type,
-          value: fieldComponent.localValue,
-          rules: fieldComponent.rules,
+      for (let i in fields) {
+        if (i !== '__has_fields') {
+          if (fields[i].__has_fields) {
+            output[i] = this.getFieldsFromRegistry(fields[i], includeAlerts)
+            output[i].__has_fields = true
+          } else {
+            output[i] = this.getFieldFromRegistry(fields[i], includeAlerts)
+          }
         }
+      }
+
+      return output
+    },
+    getFieldFromRegistry (fieldComponent, includeAlerts) {
+      fieldComponent.$parent.localBadge = fieldComponent.$parent.badge
+      fieldComponent.$parent.badgeKey++
+
+      if (includeAlerts && fieldComponent.rules) {
+        for (let r=0; r<fieldComponent.rules.length; r++) {
+          let rule = fieldComponent.rules[r]
+          let message = this.validator.check(rule, fieldComponent)
+
+          if (message !== null) {
+            fieldComponent.$parent.localBadge = {
+              type: 'error',
+              message,
+            }
+
+            if (this.debug) {
+              console.log('error from:', fieldComponent)
+            }
+            
+            this.alerts++
+            break
+          }
+        }
+      }
+
+      let output = {
+        label: fieldComponent.$parent.label || fieldComponent.label,
+        name: fieldComponent.name,
+        type: fieldComponent.$parent.type,
+        value: fieldComponent.localValue,
+        rules: fieldComponent.rules,
       }
 
       return output
@@ -264,27 +298,25 @@ export default {
       }
     },
     enable () {
-      for (let i in this.registry) {
-        this.registry[i].$parent.localDisabled = null
-      }
+      this.eachRegisteredField(this.registry, field => {
+        field.$parent.localDisabled = null
+      })
 
       if (this.submitComponent) {
         this.submitComponent.localDisabled = null
       }
     },
     disable () {
-      for (let i in this.registry) {
-        this.registry[i].$parent.localDisabled = true
-      }
+      this.eachRegisteredField(this.registry, field => {
+        field.$parent.localDisabled = true
+      })
       
       if (this.submitComponent) {
         this.submitComponent.localDisabled = true
       }
     },
     reset () {
-      for (let i in this.registry) {
-        let field = this.registry[i]
-
+      this.eachRegisteredField(this.registry, field => {
         if (field.defaultValue) {
           field.localValue = field.defaultValue
         } else {
@@ -296,12 +328,12 @@ export default {
         } else {
           field.localChecked = null
         }
-      }
+      })
     },
     clearAlerts () {
-      for (let i in this.registry) {
-        this.registry[i].$parent.localBadge = null
-      }
+      this.eachRegisteredField(this.registry, field => {
+        field.$parent.localBadge = null
+      })
     },
     complete (reset) {
       this.endProcessing()
@@ -317,12 +349,12 @@ export default {
       this.dialogEnabled = false
     },
     refresh () {
-      this.formObj = this.toFormObject(this.getFieldsFromRegistry())
+      this.formObj = this.toFormObject(this.getFieldsFromRegistry(this.regsitry))
       this.$emit('init', this.formObj)
     }
   },
   mounted: function () {
-    this.formObj = this.toFormObject(this.getFieldsFromRegistry())
+    this.formObj = this.toFormObject(this.getFieldsFromRegistry(this.registry))
     this.$emit('init', this.formObj)
   }
 }

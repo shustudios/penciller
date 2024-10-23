@@ -316,7 +316,7 @@ export default {
           this.$refs.input.select()
         }
           
-        this.handleFocus()
+        this.handleFocus({ target:this.$refs.input })
       }
     }
 
