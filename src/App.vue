@@ -1,36 +1,5 @@
 <template>
-  <ui-form @submit="handleSubmit">
-    <ui-repeater
-      :template="template"
-      :values="values"
-      min="1"
-      max="4"
-      v-slot="inst"
-      @update="handleUpdate"
-    >
-      <div class="ui-cols">
-        <ui-field
-          type="text"
-          :name="'inst[' + inst.idx + '][val]'"
-          :value="inst.val"
-          label="Text"
-          @input="val => handleInput('val', val, inst.idx)"
-          class="--expanded"
-        />
-        <ui-field
-          type="select"
-          :name="'inst[' + inst.idx + '][sel]'"
-          label="Select"
-          :options="options"
-          :value="inst.sel"
-          @input="val => handleInput('sel', val, inst.idx)"
-          class="--expanded"
-        />
-      </div>
-    </ui-repeater>
-    <ui-field type="text" name="text" label="Text" focus="true" />
-    <ui-submit name="submit" label="Submit" />
-  </ui-form>
+  <ui-tree :options="treeOptions" />
 </template>
 
 <script>
@@ -53,6 +22,23 @@ export default {
         { label: 'Option Seven', value:'op7' },
         { label: 'Option Eight', value:'op8' },
       ],
+      treeOptions: {
+        label: 'Book',
+        children: [
+          {
+            label: 'Chapter One',
+            children: [
+              { label: 'Paragraph One' },
+              { label: 'Paragraph Two' },
+              { label: 'Paragraph Three' },
+              { label: 'Paragraph Four' },
+              { label: 'Paragraph Five' },
+            ]
+          },
+          { label: 'Chapter Two' },
+          { label: 'Chapter Three' },
+        ]
+      },
       disabled: true,
     }
   },
