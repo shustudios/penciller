@@ -280,6 +280,34 @@ export default {
 
       return output
     },
+    validate () {
+      let output = true
+
+      this.eachRegisteredField(this.registry, fieldComponent => {
+        fieldComponent.$parent.localBadge = null
+        fieldComponent.$parent.badgeKey++
+
+        if (fieldComponent.rules) {
+          for (let r=0; r<fieldComponent.rules.length; r++) {
+            let rule = fieldComponent.rules[r]
+            let message = this.validator.check(rule, fieldComponent)
+
+            if (message !== null) {
+              fieldComponent.$parent.localBadge = {
+                type: 'error',
+                message,
+              }
+              
+              output = false
+              break
+            }
+          }
+
+        }
+      })
+
+      return output
+    },
     setValidationMessage (rule, message) {
       this.validator.messages[rule] = message
     },
