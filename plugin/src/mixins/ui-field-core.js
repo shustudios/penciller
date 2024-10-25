@@ -269,7 +269,7 @@ export default {
 
           let balloonElm = this.$refs.balloon
           if (balloonElm && balloonElm.$el) {
-            document.body.removeChild(balloonElm.$el)
+            balloonElm.$el.parentNode.removeChild(balloonElm.$el)
           }
         }
       }
