@@ -21,7 +21,7 @@
           :tabindex="tabIdx"
           :style="balloonPlacement"
           :class="'ui-balloon ' + css + ' ' + direction"
-          @click.stop
+          @click="handleClick"
           v-if="showContent"
         >
           <slot />
@@ -49,6 +49,10 @@ export default {
       type: String,
       default: () => 'dropdown'
     },
+    stop: {
+      type: Boolean,
+      default: () => true
+    }
   },
   data () {
     return {
@@ -241,6 +245,11 @@ export default {
       }
 
       return output
+    },
+    handleClick (e) {
+      if (this.stop) {
+        e.stopPropagation()
+      }
     },
     handleWheel (e) {
       if (this.enabled) {

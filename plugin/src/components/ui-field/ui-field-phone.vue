@@ -59,6 +59,7 @@ export default {
         }
       },
       set (newValue) {
+        this.$emit('input', newValue)
         return newValue
       }
     },

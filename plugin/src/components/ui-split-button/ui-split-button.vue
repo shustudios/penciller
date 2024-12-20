@@ -24,6 +24,7 @@
           :type="balloon.type"
           :container="localContainer"
           :enabled="open"
+          :stop="false"
         >
           <slot />
         </ui-balloon>

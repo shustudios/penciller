@@ -1,5 +1,14 @@
 <template>
-  <ui-tree :options="treeOptions" />
+  <ui-repeater
+    :template="template"
+    :values="values"
+    :min="0"
+    :max="6"
+    v-slot="item"
+    @update="handleUpdate"
+  >
+    <div>Item {{ item.idx }}</div>
+  </ui-repeater>
 </template>
 
 <script>
@@ -86,19 +95,26 @@ export default {
 
       return output
     },
+    handleClick: function () {
+      this.$refs.form.triggerSubmit()
+    },
     handleUpdate: function (newValue) {
       this.values = newValue
     },
-    handleInput: function (prop, val, idx) {
-      this.values[idx][prop] = val
+    handleInput: function (newValue) {
+      console.log('---', newValue)
     },
     handleSubmit: function (form) {
       if (form) {
-        form.startProcessing()
-        console.log('--', form)
-        form.endProcessing()
+        console.log('---', form.fields.tags.value)
+        // form.startProcessing()
+        // console.log('--', form)
+        // form.complete(true)
       }
     },
+    handleTest: function () {
+      console.log('close')
+    }
   }
 }
 </script>

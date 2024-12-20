@@ -213,7 +213,7 @@ export default {
       this.minute = vals[1]
       this.daytime = vals[2]
 
-      this.handleInput() // set value by default
+      // this.handleInput() // set value by default
     },
     afterDestroy () {
       this.$refs.hour.removeEventListener('wheel', this.handleHourWheel)
@@ -275,6 +275,8 @@ export default {
                 dt = timeObj.daytime
               }
             }
+          } else {
+            h = '0'
           }
 
           if (min > 0 && min < 60) {
@@ -283,6 +285,8 @@ export default {
             } else {
               m = String(min)
             }
+          } else {
+            m = '00'
           }
         }
       }
@@ -420,6 +424,7 @@ export default {
 
       this.$parent.localBadge = null
       this.localValue = output
+      console.log(this.hour, this.minute, this.daytime)
       this.$emit('input', output)
     },
     handleHourInput (e) {

@@ -1,46 +1,49 @@
 <template>
   <div class="ui-repeater">
-
-    <div
-      ref="fieldsets"
-      v-for="(fieldset, idx) in localFields"
-      :class="fieldsetClass(idx)"
-      :key="'fieldset_' + idx"
-    >
-      <div class="ui-fieldset-body">
-        <slot v-bind="fieldset" :idx="idx" />
-      </div>
-      <div class="ui-fieldset-ctrls">
-        <div
-          :class="viewClass(idx)"
-          @click="toggleView(idx)"
-          v-if="isCollapsible"
-        />
-        <div :class="switchClass" v-if="isMoveable" @click.stop>
-          <div class="ui-fieldset__icon --switch" @click="toggleSwitchMenu(idx)" />
-          <div :class="switchMenuClass(idx)">
-            <div
-              class="switch__button"
-              @click="moveFieldsetUp(idx)"
-              v-if="idx > 0"
-            >
-              Move Up
-            </div>
-            <div
-              class="switch__button"
-              @click="moveFieldsetDown(idx)"
-              v-if="idx < localFields.length - 1"
-            >
-              Move Down
+    <template v-if="localFields.length > 0">
+      <div
+        ref="fieldsets"
+        v-for="(fieldset, idx) in localFields"
+        :class="fieldsetClass(idx)"
+        :key="'fieldset_' + idx"
+      >
+        <div class="ui-fieldset-body">
+          <slot v-bind="fieldset" :idx="idx" />
+        </div>
+        <div class="ui-fieldset-ctrls">
+          <div
+            :class="viewClass(idx)"
+            @click="toggleView(idx)"
+            v-if="isCollapsible"
+          />
+          <div :class="switchClass" v-if="isMoveable" @click.stop>
+            <div class="ui-fieldset__icon --switch" @click="toggleSwitchMenu(idx)" />
+            <div :class="switchMenuClass(idx)">
+              <div
+                class="switch__button"
+                @click="moveFieldsetUp(idx)"
+                v-if="idx > 0"
+              >
+                Move Up
+              </div>
+              <div
+                class="switch__button"
+                @click="moveFieldsetDown(idx)"
+                v-if="idx < localFields.length - 1"
+              >
+                Move Down
+              </div>
             </div>
           </div>
+          <div
+            :class="deleteClass"
+            @click="deleteFieldset(idx)"
+          />
         </div>
-        <div
-          :class="deleteClass"
-          @click="deleteFieldset(idx)"
-        />
       </div>
-    </div>
+    </template>
+
+    <div class="empty" v-else />
 
     <ui-field
       type="button"
@@ -449,6 +452,20 @@ export default {
 
 .switch__button:last-child {
   margin: 0;
+}
+
+.empty {
+  padding: 4rem 6rem;
+  text-align: center;
+  border: dashed 0.2rem var(--color-brdr-quarternary);
+  border-radius: 1;
+  margin: 0 0 1rem 0;
+}
+
+.empty:after {
+  content: '- no items -';
+  color: var(--color-text-tertiary);
+  font-style: italic;
 }
 
 @media (hover: hover) and (pointer: fine) {
