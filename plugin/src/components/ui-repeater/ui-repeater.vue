@@ -43,7 +43,7 @@
       </div>
     </template>
 
-    <div class="empty" v-else />
+    <div class="ui-repeater-empty" v-else />
 
     <ui-field
       type="button"
@@ -454,15 +454,15 @@ export default {
   margin: 0;
 }
 
-.empty {
+.ui-repeater-empty {
   padding: 4rem 6rem;
   text-align: center;
   border: dashed 0.2rem var(--color-brdr-quarternary);
-  border-radius: 1;
+  border-radius: 1rem;
   margin: 0 0 1rem 0;
 }
 
-.empty:after {
+.ui-repeater-empty:after {
   content: '- no items -';
   color: var(--color-text-tertiary);
   font-style: italic;

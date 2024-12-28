@@ -72,10 +72,15 @@ export default {
   emits: ['input'],
   props: {
     value: Object,
+    filter: Object,
     min: String,
     max: String,
     type: String,
     parent: null,
+    menu: {
+      type: Boolean,
+      default: true,
+    }
   },
   data () {
     return {
@@ -165,10 +170,12 @@ export default {
       })
     },
     handleMonths: function (idx) {
+      if (!this.menu) { return }
       if (idx > 0) { return }
       this.shortcut = 'month'
     },
     handleYears: function (idx) {
+      if (!this.menu) { return }
       if (idx > 0) { return }
       this.shortcut = 'year'
 
@@ -184,8 +191,10 @@ export default {
     titleClass (idx) {
       let output = 'ui-calendar-title'
 
-      if (idx === 0) {
-        output += ' --shortcut'
+      if (this.menu) {
+        if (idx === 0) {
+          output += ' --shortcut'
+        }
       }
 
       return output
@@ -373,18 +382,7 @@ export default {
 
           id = strYear + '-' + strMonth + '-' + strDay
           datetime = new Date(id).getTime()
-
-          if (maxtime) {
-            if (datetime > maxtime) {
-              disabled = true
-            }
-          }
-
-          if (mintime) {
-            if (datetime < mintime) {
-              disabled = true
-            }
-          }
+          disabled = this.isDisabled(datetime, id)
         }
         
         dates.push({ label, id, disabled })
@@ -424,6 +422,102 @@ export default {
       let date = new Date(y, m, d)
 
       return date instanceof Date && !isNaN(date)
+    },
+    isDisabled(datetime, datestring) {
+      let output = null
+      let before = false
+      let after = false
+      let exclude = false
+
+      if (this.filter) {
+        for (let key in this.filter.exclude) {
+          let val = this.filter.exclude[key]
+          let filtertime = new Date(val).getTime()
+
+          switch (key) {
+            case 'before':
+              if (datetime < filtertime) {
+                output = true
+              }
+
+              before = true
+              break
+
+            case 'after':
+              if (datetime > filtertime) {
+                output = true
+              } else {
+                if (!before) { output = null }
+              }
+
+              after = true
+              break
+
+            case 'is':
+              if (Array.isArray(val)) {
+                if (val.includes(datestring)) {
+                  output = true
+                } else {
+                  if (!before && !after) { output = null }
+                }
+              } else {
+                if (datetime === filtertime) {
+                  output = true
+                } else {
+                  if (!before && !after) { output = null }
+                }
+              }
+              break
+          }
+
+          exclude = true
+        }
+
+        for (let key in this.filter.include) {
+          let val = this.filter.include[key]
+          let filtertime = new Date(val).getTime()
+
+          switch (key) {
+            case 'before':
+              if (datetime >= filtertime) {
+                 if (!exclude) { output = true }
+              } else {
+                output = null
+              }
+
+              before = true
+              break
+
+            case 'after':
+              if (datetime <= filtertime) {
+                if (!before) { output = true }
+              } else {
+                output = null
+              }
+
+              after = true
+              break
+
+            case 'is':
+              if (Array.isArray(val)) {
+                if (!val.includes(datestring)) {
+                  if (!before && !after) { output = true }
+                } else {
+                  output = null
+                }
+              } else {
+                if (datetime !== filtertime) {
+                  if (!before && !after) { output = true }
+                } else {
+                  output = null
+                }
+              }
+              break
+          }
+        }
+      }
+
+      return output
     }
   },
   mounted () {

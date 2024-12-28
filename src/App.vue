@@ -1,20 +1,28 @@
 <template>
-  <ui-repeater
-    :template="template"
-    :values="values"
-    :min="0"
-    :max="6"
-    v-slot="item"
-    @update="handleUpdate"
-  >
-    <div>Item {{ item.idx }}</div>
-  </ui-repeater>
+  <ui-calendar
+    :filter="dateFilter"
+    :menu="false"
+    :parent="parentElm"
+  />
 </template>
 
 <script>
 export default {
   data: function () {
     return {
+      dateFilter: {
+        exclude: {
+          before: '2024-12-12',
+          after: '2024-12-25',
+          // is: ['2024-12-12', '2024-12-25', '2024-12-18'],
+        },
+        include: {
+          // before: '2024-12-06',
+          // after: '2024-12-16',
+          is: ['2024-12-09', '2024-12-02'],
+        }
+      },
+      parentElm: document.body,
       template: { val:'', sel: 'op3' },
       values: [
         { val:'Hello', sel: 'op3' },
@@ -106,7 +114,7 @@ export default {
     },
     handleSubmit: function (form) {
       if (form) {
-        console.log('---', form.fields.tags.value)
+        console.log('---', form)
         // form.startProcessing()
         // console.log('--', form)
         // form.complete(true)
@@ -115,7 +123,7 @@ export default {
     handleTest: function () {
       console.log('close')
     }
-  }
+  },
 }
 </script>
 
@@ -126,6 +134,10 @@ export default {
 
 .ui-form {
   max-width: 60rem;
+}
+
+.ui-calendar {
+  max-width: 50rem;
 }
 
 @media screen and (max-width: 550px) {

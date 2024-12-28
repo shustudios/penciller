@@ -5,6 +5,7 @@ import './src/assets/styles/layout.css'
 import Penciller from './src/includes/penciller.js'
 
 import UiBadge from './src/components/ui-badge/ui-badge.vue'
+import UiCalendar from './src/components/ui-balloon/ui-calendar.vue'
 import UiCollection from './src/components/ui-collection/ui-collection.vue'
 import UiCreditCard from './src/components/ui-credit-card/ui-credit-card.vue'
 import UiDialog from './src/components/ui-dialog/ui-dialog.vue'
@@ -36,6 +37,7 @@ export default {
     }
 
     app.component(`${prefix}Badge`, UiBadge)
+    app.component(`${prefix}Calendar`, UiCalendar)
     app.component(`${prefix}Collection`, UiCollection)
     app.component(`${prefix}CreditCard`, UiCreditCard)
     app.component(`${prefix}Dialog`, UiDialog)

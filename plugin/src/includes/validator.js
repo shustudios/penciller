@@ -3,24 +3,24 @@ class Validator {
     this.result = {}
     this.dateformat = 'YYYY-MM-DD'
     this.messages = {
-      creditexpiry: 'The date provided in this %label% field is not valid.',
-      creditnumber: 'The credit card number provided in this %label% field is not valid.',
-      creditcode: 'Please provide a valid security code in this %label% field, found on the back of your card.',
-      dateformat: 'The date provided in this %label% field is not valid.',
-      dateformats: 'The \'%dir%\' date provided in this %label% field is not valid.',
-      dateorder: 'The \'To\' date cannot be after the \'From\' date in this %label% field.',
-      daterange: 'The date provided in this %label% field is not within the specified range.',
-      dateranges: 'The \'%dir%\' date provided in this %label% field is not within the specified range.',
-      email: 'This %label% field requires a properly formatted email address.',
+      creditexpiry: 'The date provided in %this% %label% field is not valid.',
+      creditnumber: 'The credit card number provided in %this% %label% field is not valid.',
+      creditcode: 'Please provide a valid security code in %this% %label% field, found on the back of your card.',
+      dateformat: 'The date provided in %this% %label% field is not valid.',
+      dateformats: 'The \'%dir%\' date provided in %this% %label% field is not valid.',
+      dateorder: 'The \'To\' date cannot be after the \'From\' date in %this% %label% field.',
+      daterange: 'The date provided in %this% %label% field is not within the specified range.',
+      dateranges: 'The \'%dir%\' date provided in %this% %label% field is not within the specified range.',
+      email: '%This% %label% field requires a properly formatted email address.',
       min: 'The minimum value allowed is %min%.',
       max:  'The maximum value allowed is %max%.',
-      password: 'This %label% field requires at least:<br>(8 characters, 1 lowercase, 1 uppercase).',
-      phone: 'This %label% is in an incorrect format.',
+      password: '%This% %label% field requires at least:<br>(8 characters, 1 lowercase, 1 uppercase).',
+      phone: '%This% %label% field is in an incorrect format.',
       range: 'The provided value is outside of the specified (%min% - %max%) range.',
-      required: 'Please complete this %label% field - it is required.',
-      time: 'The time provided in this %label% field is not valid.',
-      unique: 'Value for this %label% field needs to be unique.',
-      machine: 'Value for this %label% can only contain alphanumeric characters and dashes.',
+      required: 'Please complete %this% %label% field - it is required.',
+      time: 'The time provided in %this% %label% field is not valid.',
+      unique: 'Value for %this% %label% field needs to be unique.',
+      machine: 'Value for %this% %label% can only contain alphanumeric characters and dashes.',
     }
   }
 
@@ -38,16 +38,27 @@ class Validator {
   }
 
   handleMessage (type, field) {
-    if (field.$parent.localMessages[type]) {
-      return field.$parent.localMessages[type]
+    let output
+    let label = this.getLabel(field)
+
+    if (field.$parent.localMessages && field.$parent.localMessages.hasOwnProperty(type)) {
+      output = field.$parent.localMessages[type]
     } else {
-      return this.messages[type]
+      output = this.messages[type]
     }
+
+    if (label) {
+      output = output.replace(/%label%/g, label).replace(/%this%/g, 'the').replace(/%This%/g, 'The')
+    } else {
+      output = output.replace(/%label%/g, '').replace(/%this%/g, 'this').replace(/%This%/g, 'This')
+    }
+
+    return output
   }
 
   creditcode(field) {
     if (this.isEmpty(field.localValue)) {
-      return this.handleMessage('creditcode', field).replace('%label%', this.getLabel(field))
+      return this.handleMessage('creditcode', field)
     } else {
       return null
     }
@@ -58,7 +69,7 @@ class Validator {
       let parts = field.localValue.split('/')
 
       if (parts[0] > 12 || parts[0] < 1) {
-        return this.handleMessage('creditexpiry', field).replace('%label%', this.getLabel(field))
+        return this.handleMessage('creditexpiry', field)
       } else {
         return null
       }
@@ -68,7 +79,7 @@ class Validator {
   creditnumber(field) {
     if (!this.isEmpty(field.localValue)) {
       if (!this.isValidCard(field.localValue)) {
-        return this.handleMessage('creditnumber', field).replace('%label%', this.getLabel(field))
+        return this.handleMessage('creditnumber', field)
       } else {
         return null
       }
@@ -94,13 +105,11 @@ class Validator {
     }
 
     if (!this.isValidDate(field.localValue)) {
-      let msg = this.handleMessage('dateformat', field)
-      return msg.replace('%label%', this.getLabel(field))
+      return this.handleMessage('dateformat', field)
     }
 
     if (!inrange) {
-      let msg = this.handleMessage('daterange', field)
-      return msg.replace('%label%', this.getLabel(field))
+      return this.handleMessage('daterange', field)
     }
 
     return null
@@ -138,20 +147,16 @@ class Validator {
 
     if (val.from && val.to) {
       if (val.from > val.to) {
-        return this.handleMessage('dateorder', field).replace('%label%', this.getLabel(field))
+        return this.handleMessage('dateorder', field)
       }
     }
 
     if (invalid !== '') {
-      let msg = this.handleMessage('dateformats', field)
-      msg = msg.replace('%label%', this.getLabel(field))
-      return msg.replace('%dir%', invalid)
+      return this.handleMessage('dateformats', field).replace('%dir%', invalid)
     }
 
     if (outrange !== '') {
-      let msg = this.handleMessage('dateranges', field)
-      msg = msg.replace('%label%', this.getLabel(field))
-      return msg.replace('%dir%', outrange)
+      return this.handleMessage('dateranges', field).replace('%dir%', outrange)
     }
 
     return null
@@ -162,7 +167,7 @@ class Validator {
       // eslint-disable-next-line
       const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       if (!re.test(field.localValue)) {
-        return this.handleMessage('email', field).replace('%label%', this.capitalize(this.getLabel(field)))
+        return this.handleMessage('email', field)
       }
     }
 
@@ -174,7 +179,7 @@ class Validator {
       var regexp = /^[a-zA-Z0-9-]+$/
 
       if (field.localValue.search(regexp) === -1) {
-        return this.handleMessage('machine', field).replace('%label%', this.getLabel(field))
+        return this.handleMessage('machine', field)
       } else {
         return null
       }
@@ -213,17 +218,17 @@ class Validator {
     let regex = new RegExp("^(?=.{8,})(?=.*[a-z])(?=.*[A-Z])")
 
     if (!regex.test(field.fieldValue)) {
-      return this.handleMessage('password', field).replace('%label%', this.capitalize(this.getLabel(field)))
+      return this.handleMessage('password', field)
     }
 
     return null
   }
 
   phone(field) {
-    let regex = new RegExp(/^[0-9-]+$/g)
-
+    let regex = new RegExp(/^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/)
+    
     if (!regex.test(field.fieldValue)) {
-      return this.handleMessage('phone', field).replace('%label%', this.capitalize(this.getLabel(field)))
+      return this.handleMessage('phone', field)
     }
 
     return null
@@ -234,11 +239,11 @@ class Validator {
       if (field.localChecked === true) {
         return null
       } else {
-        return this.handleMessage('required', field).replace('%label%', this.getLabel(field))
+        return this.handleMessage('required', field)
       }
     } else {
       if (this.isEmpty(field.fieldValue)) {
-        return this.handleMessage('required', field).replace('%label%', this.getLabel(field))
+        return this.handleMessage('required', field)
       }
   
       return null
@@ -265,7 +270,7 @@ class Validator {
     if (valid) {
       return null
     } else {
-      return this.handleMessage('time', field).replace('%label%', this.capitalize(this.getLabel(field)))
+      return this.handleMessage('time', field)
     }
   }
 
@@ -277,7 +282,7 @@ class Validator {
         let item = registry[key]
 
         if (item.name !== field.name && item.localValue === field.localValue) {
-          return this.handleMessage('unique', field).replace('%label%', this.getLabel(field))
+          return this.handleMessage('unique', field)
         }
       }
 
