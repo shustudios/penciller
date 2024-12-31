@@ -37,8 +37,7 @@
       <ui-calendar
         ref="calendar"
         :value="balloonValue"
-        :min="min"
-        :max="max"
+        :filter="filter"
         :parent="parentElm"
         @input="handleBalloonInput"
       />
@@ -64,8 +63,7 @@ export default {
     focus: [String, Boolean],
     select: [String, Boolean],
     balloon: Object,
-    min: String,
-    max: String,
+    filter: Object,
     rules: {
       type: Array,
       default: () => ['required', 'date']
@@ -79,8 +77,9 @@ export default {
   data () {
     return {
       valid: true,
-      maskedValue: '',
       parentElm: null,
+      maskFormat: 'date',
+      mask: this.maskValue(this.fieldValue, 'date'),
     }
   },
   watch: {
@@ -93,6 +92,15 @@ export default {
     }
   },
   computed: {
+    localValue: function() {
+      let output = this.fieldValue || ''
+     
+      if (output && this.isValidFormat(output, this.maskFormat)) {
+        output = this.maskValue(output, this.maskFormat).val
+      }
+
+      return output
+    },
     localPlaceholder () {
       let output = 'yyyy-mm-dd'
 
@@ -188,25 +196,22 @@ export default {
       }
     },
     handleInput (e) {
-      let newValue = this.unmaskValue(e.currentTarget.value, 'date')
-      let caret = e.currentTarget.selectionStart
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      let newValue = e.currentTarget.value
+      let unmaskedValue = this.unmaskValue(newValue, this.maskFormat)
+      let cursor = e.currentTarget.selectionStart
+
+      this.mask.pos = cursor-1
       
-      if (this.isValidFormat(newValue, 'date')) {
-        let newFormat = this.maskValue(newValue, 'date', caret)
-
-        this.$emit('input', newFormat.val)
-        this.maskedValue = newFormat.val
-
-        setTimeout(() => { this.$refs.input.setSelectionRange(newFormat.pos, newFormat.pos)},20)
-
-      } else {
-        if (newValue !== '') {
-          e.preventDefault()
-          e.currentTarget.value = this.maskedValue
-        } else {
-          this.$emit('input', '')
-        }
+      if (newValue === '' || this.isValidFormat(unmaskedValue, this.maskFormat) && e.data !== '-') {
+        this.mask = this.maskValue(unmaskedValue, this.maskFormat, cursor)
+        this.$emit('input', this.mask.val)
       }
+
+      e.currentTarget.value = this.mask.val
+      e.currentTarget.setSelectionRange(this.mask.pos, this.mask.pos)
     },
     handleBalloon (e) {
       if (this.localDisabled) { return }

@@ -33,6 +33,7 @@
         :options="localOptions"
         :checked="localChecked"
         :balloon="localBalloon"
+        :filter="localFilter"
         v-bind="filteredAttrs"
         v-if="name"
         @input="handleInput"
@@ -100,6 +101,7 @@ export default {
     messages: Object,
     disabled: [String, Boolean],
     checked: [String, Boolean],
+    filter: Object,
     balloon: {
       type: Object,
       default: () => { return {}}
@@ -123,6 +125,7 @@ export default {
       localErrors: 'badge',
       localChecked: this.checked,
       localBalloon: this.balloon,
+      localFilter: this.filter,
     }
   },
   watch: {
@@ -156,6 +159,9 @@ export default {
         this.localBalloon = newValue
       },
       deep: true
+    },
+    filter (newValue) {
+      this.localFilter = newValue
     }
   },
   computed: {

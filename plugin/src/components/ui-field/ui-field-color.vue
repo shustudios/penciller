@@ -90,24 +90,17 @@ export default {
       open: false,
       prefix: '#',
       valid: true,
-      maskedValue: '',
       parentElm: null,
+      maskFormat: 'hex',
+      mask: this.maskValue(this.fieldValue, 'hex'),
     }
   },
   computed: {
-    localValue () {
-      let output = ''
+    localValue: function() {
+      let output = this.fieldValue || ''
 
-      if (this.fieldValue) {
-        output = this.fieldValue
-
-        if (output.charAt(0) === '#') {
-          output = output.substring(1)
-        }
-
-        if (!this.isValidFormat('#' + output, 'hex')) {
-          output = ''
-        }
+      if (output && this.isValidFormat(output, this.maskFormat)) {
+        output = this.maskValue(output, this.maskFormat).val
       }
 
       return output
@@ -165,21 +158,19 @@ export default {
       this.$refs.input.focus()
     },
     handleInput (e) {
-      let newValue = '#' + e.currentTarget.value
+      if (this.localDisabled) { return }
+      e.preventDefault()
+      
+      let newValue = e.currentTarget.value.toUpperCase()
+      let cursor = e.currentTarget.selectionStart
 
-      if (this.isValidFormat(newValue, 'hex')) {
-
-        this.$emit('input', newValue.toUpperCase())
-        this.maskedValue = this.maskValue(newValue, 'hex').val.toUpperCase()
-
-      } else {
-        if (newValue !== '#') {
-          e.preventDefault()
-          e.currentTarget.value = this.maskedValue
-        } else {
-          this.$emit('input', newValue)
-        }
+      if (newValue === '' || this.isValidFormat('#' + newValue, this.maskFormat)) {
+        this.mask = this.maskValue(newValue, this.format, cursor)
+        this.$emit('input', this.mask.val)
       }
+
+      e.currentTarget.value = this.mask.val
+      e.currentTarget.setSelectionRange(this.mask.pos, this.mask.pos)
     },
     handleBalloon (e) {
       if (this.localDisabled) { return }

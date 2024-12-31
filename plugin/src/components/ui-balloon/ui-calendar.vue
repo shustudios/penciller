@@ -4,25 +4,21 @@
     class="ui-calendar"
   >
     <div class="ui-shortcut" v-if="shortcut">
-      <div class="ui-shortcut-body --month" v-if="shortcut === 'month'">
-        <div
-          :class="monthClass(m)"
-          :key="'mth_' + m"
-          v-for="(mth, m) in monthnames"
-          @click="gotoMonth(m)"
-        >
-          {{ mth.substring(0, 3) }}
-        </div>
-      </div>
-
-      <div class="ui-shortcut-body --year" v-if="shortcut === 'year'" ref="years">
+      <div class="ui-shortcut-body" ref="shortcut">
         <div
           :class="yearClass(yr)"
           :key="'yr_' + y"
           v-for="(yr, y) in years"
-          @click="gotoYear(yr)"
         >
-          {{ yr }}
+          <div class="ui-shortcut-year">{{ yr }}</div>
+          <div class="ui-shortcut-months">
+            <div class="ui-shortcut-month"
+              :class="monthClass(yr, m)"
+              :key="'mth_' + m"
+              v-for="(mth, m) in monthnames"
+              @click="gotoDate(yr, m)"
+            >{{ mth.substring(0, 3) }}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -36,11 +32,7 @@
       </div>
       <div class="ui-calendar-body">
         <div class="ui-calendar-month" :style="inlinestyle" v-for="(itm, i) in months" :key="i">
-          <div :class="titleClass(i)">
-            <div class="ui-calendar-monthtitle" @click="handleMonths(i)">{{ itm.monthname }}</div>
-            <div class="ui-calendar-yeartitle" @click="handleYears(i)">{{ itm.year }}</div>
-          </div>
-          <!-- <div :class="titleClass(i)" @click="openShortcut(i)">{{ itm.monthname }} {{ itm.year }}</div> -->
+          <div :class="titleClass" @click="openShortcut">{{ itm.monthname }} {{ itm.year }}</div>
           <div class="ui-calendar-week">
             <div
               class="ui-calendar-weekday"
@@ -73,9 +65,8 @@ export default {
   props: {
     value: Object,
     filter: Object,
-    min: String,
-    max: String,
     type: String,
+    start: String,
     parent: null,
     menu: {
       type: Boolean,
@@ -89,19 +80,17 @@ export default {
       date: {},
       months: [],
       years: [],
-      localMin: this.min,
-      localMax: this.max,
       minWidth: 260,
       inlinestyle: null,
       columns: 1,
       daynames: [
-        'Sun',
-        'Mon',
-        'Tue',
-        'Wed',
-        'Thu',
-        'Fri',
-        'Sat',
+        'Su',
+        'Mo',
+        'Tu',
+        'We',
+        'Th',
+        'Fr',
+        'Sa',
       ],
       monthnames: [
         'January',
@@ -119,14 +108,20 @@ export default {
       ],
     }
   },
+  computed: {
+    titleClass: function () {
+      let output = 'ui-calendar-title'
+
+      if (this.menu) {
+        output += ' --shortcut'
+      }
+
+      return output
+    }
+  },
   watch: {
-    min (newValue) {
-      this.localMin = newValue
-      this.init()
-    },
-    max (newValue) {
-      this.localMax = newValue
-      this.init()
+    filter: function () {
+      this.getMonths(this.date)
     }
   },
   methods: {
@@ -134,10 +129,15 @@ export default {
       this.columns = this.calcSize()
       this.inlinestyle = { width: 'calc(100% / ' + this.calcSize() + ')' }
 
-      if (this.value && this.value.from) {
-        this.date = this.parseDate(this.value.from)
+      if (this.start) {
+        let parts = this.start.split('-')
+        this.date = this.parseDate({ year: Number(parts[0]), month: Number(parts[1])-1, day: Number(parts[2]) })
       } else {
-        this.date = this.parseDate(this.value)
+        if (this.value && this.value.from) {
+          this.date = this.parseDate(this.value.from)
+        } else {
+          this.date = this.parseDate(this.value)
+        }
       }
 
       this.years = this.getYears()
@@ -159,14 +159,14 @@ export default {
 
       return output
     },
-    openShortcut (idx) {
-      if (idx > 0) { return }
+    openShortcut () {
+      if (!this.menu) {{ return }}
       this.shortcut = true
 
       this.$nextTick(() => {
-        let sel = this.$refs.years.getElementsByClassName('--selected')[0]
-        let center = sel.offsetTop - (this.$refs.years.offsetHeight / 2)
-        this.$refs.years.scrollTo(0, center)
+        let sel = this.$refs.shortcut.getElementsByClassName('ui-shortcut-item --selected')[0]
+        let center = sel.offsetTop - (this.$refs.shortcut.offsetHeight / 2)
+        this.$refs.shortcut.scrollTo(0, center)
       })
     },
     handleMonths: function (idx) {
@@ -188,21 +188,10 @@ export default {
     closeShortcut () {
       this.shortcut = null
     },
-    titleClass (idx) {
-      let output = 'ui-calendar-title'
+    monthClass (year, month) {
+      let output = ''
 
-      if (this.menu) {
-        if (idx === 0) {
-          output += ' --shortcut'
-        }
-      }
-
-      return output
-    },
-    monthClass (month) {
-      let output = 'ui-shortcut-item'
-
-      if (this.date.month === month) {
+      if (this.date.year === year && this.date.month === month) {
         output += ' --selected'
       }
 
@@ -349,11 +338,6 @@ export default {
       let nextObj = this.nextMonth(date)
       let len = new Date(nextObj.year, nextObj.month, 0).getDate() // last day of this month
       let start = lastObj.getDay() + 1
-      let mintime = false
-      let maxtime = false
-
-      if (this.localMax) { maxtime = new Date(this.localMax).getTime() }
-      if (this.localMin) { mintime = new Date(this.localMin).getTime() }
 
       if (start > 6) { start = 0 }
 
@@ -406,6 +390,11 @@ export default {
     },
     gotoYear (year) {
       this.date = { year, month: this.date.month, day: this.date.day }
+      this.getMonths(this.date)
+      this.shortcut = false
+    },
+    gotoDate (year, month) {
+      this.date = { year, month, day: this.date.day }
       this.getMonths(this.date)
       this.shortcut = false
     },
@@ -545,41 +534,46 @@ export default {
 }
 
 .ui-shortcut-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr;
-  column-gap: 1rem;
-  row-gap: 1rem;
-  flex-grow: 1;
   padding: 1rem;
   height: 100%;
-}
-
-.ui-shortcut-body.--year {
   overflow-y: scroll;
 }
 
-.ui-shortcut-body.--month .ui-shortcut-item {
+.ui-shortcut-item {
+  padding: 1rem;
+  border: solid 0.2rem var(--color-brdr-quarternary);
+  border-radius: 0.6rem;
+  margin: 0 0 1rem 0;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 0.3rem;
   cursor: pointer;
-}
-
-.ui-shortcut-body.--year .ui-shortcut-item {
-  padding: 1.5rem 2rem;
-  border-radius: 0.3rem;
-  text-align: center;
-  cursor: pointer;
-}
-
-.ui-shortcut-body.--year .ui-shortcut-item :last-child {
-  border-bottom: none;
 }
 
 .ui-shortcut-item.--selected {
-  color: var(--color-text-active);
+  border-color: var(--color-active);
+}
+
+.ui-shortcut-month.--selected  {
+  background-color: var(--color-active);
+  color: var(--color-text-inverted);
+}
+
+.ui-shortcut-year {
+  width: 5rem;
+  padding: 1rem;
+  font-size: 1.8rem;
+}
+
+.ui-shortcut-months {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
+  width: 100%;
+}
+
+.ui-shortcut-month {
+  padding: 0.5rem;
+  margin: 0.5rem;
+  border-radius: 0.2rem;
+  text-align: center;
 }
 
 .ui-calendar {
@@ -621,10 +615,16 @@ export default {
 }
 
 .ui-calendar-title {
-  padding: 0 0 0 1rem;
+  padding: 0.6rem 1.4rem;
   margin: 0 6rem 0 0;
-  display: flex;
+  display: inline-block;
   position: relative;
+  font-size: 1.8rem;
+  border-radius: 0.2rem;
+}
+
+.ui-calendar-title.--shortcut {
+  cursor: pointer;
 }
 
 .ui-calendar-monthtitle,
@@ -632,25 +632,6 @@ export default {
   padding: 0.5rem 0;
   margin: 0 1rem 0 0;
   position: relative;
-}
-
-.ui-calendar-title.--shortcut .ui-calendar-monthtitle,
-.ui-calendar-title.--shortcut .ui-calendar-yeartitle {
-  cursor: pointer;
-  padding: 0.5rem 1.8rem 0.5rem 0;
-}
-
-.ui-calendar-title.--shortcut .ui-calendar-monthtitle:after,
-.ui-calendar-title.--shortcut .ui-calendar-yeartitle:after {
-  content: '';
-  width: 2rem;
-  height: 2rem;
-  position: absolute;
-  top: 0.3rem;
-  right: 0;
-  background: url(../../assets/images/icon-kebab.svg) center bottom no-repeat;
-  background-size: 1.2rem;
-  opacity: 0.5;
 }
 
 .ui-calendar-ctrls {
@@ -663,15 +644,22 @@ export default {
 .ui-calendar-btn {
   width: 3rem;
   height: 3rem;
+  cursor: pointer;
+  border-radius: 0.2rem;
+}
+
+.ui-calendar-btn:before {
+  content: '';
+  width: 100%;
+  height: 100%;
+  display: block;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 2.4rem;
-  cursor: pointer;
-  opacity: 0.5;
 }
 
-.ui-calendar-btn.--prev { background-image: url(../../assets/images/icon-arrow-left.svg) }
-.ui-calendar-btn.--next { background-image: url(../../assets/images/icon-arrow-right.svg) }
+.ui-calendar-btn.--prev:before { background-image: url(../../assets/images/icon-arrow-left.svg) }
+.ui-calendar-btn.--next:before { background-image: url(../../assets/images/icon-arrow-right.svg) }
 
 .ui-calendar-week {
   display:flex;
@@ -734,8 +722,13 @@ export default {
   border-radius: 0 0.3rem 0.3rem 0;
 }
 
+.ui-calendar-date.--from.--to {
+  border-radius: 0.3rem;
+}
+
 .ui-calendar-date.--from:before,
-.ui-calendar-date.--to:before {
+.ui-calendar-date.--to:before,
+.ui-calendar-date.--from.--to:after {
   content: '';
   border-width: 0.6rem;
   border-style: solid;
@@ -753,6 +746,19 @@ export default {
   right: auto;
 }
 
+.ui-calendar-date.--from.--to:before {
+  border-right-color: var(--color-bg-primary);
+  left: auto;
+  right: -0.2rem;
+}
+
+.ui-calendar-date.--from.--to:after {
+  border-left-color: var(--color-bg-primary);
+  left: -0.2rem;
+  right: auto;
+  z-index: 2;
+}
+
 .ui-calendar-date.--between {
   border-radius: 0;
 }
@@ -767,20 +773,17 @@ export default {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .ui-calendar-title.--shortcut .ui-calendar-monthtitle:hover,
-  .ui-calendar-title.--shortcut .ui-calendar-yeartitle:hover {
-    color: var(--color-text-active);
-  }
-
-  .ui-shortcut-item:hover {
+  .ui-calendar-title.--shortcut:hover {
     background-color: var(--hilite-bg-primary);
     color: var(--color-text-inverted);
-    border-color: var(--hilite-bg-primary);
   }
 
-  .ui-calendar-btn:hover,
-  .ui-calendar-title:hover:after {
-    opacity: 1;
+  .ui-calendar-btn:hover {
+    background-color: var(--hilite-bg-primary);
+  }
+
+  .ui-calendar-btn:hover:before {
+    filter: invert(100%);
   }
 
   .ui-calendar-date:not(.--empty):not(.--disabled):hover {
@@ -790,8 +793,8 @@ export default {
     border-radius: 0.2rem;
   }
 
-  .ui-calendar.--from .ui-calendar-date:not(.--empty):not(.--disabled):hover:before,
-  .ui-calendar.--to .ui-calendar-date:not(.--empty):not(.--disabled):hover:before {
+  .ui-calendar.--from .ui-calendar-date:not(.--empty):not(.--disabled):not(.--from.--to):hover:before,
+  .ui-calendar.--to .ui-calendar-date:not(.--empty):not(.--disabled):not(.--from.--to):hover:before {
     content: '';
     border-width: 0.6rem;
     border-style: solid;
@@ -803,24 +806,24 @@ export default {
     margin-top: -0.6rem;
   }
 
-  .ui-calendar.--from .ui-calendar-date:not(.--empty):not(.--disabled):hover:before {
+  .ui-calendar.--from .ui-calendar-date:not(.--empty):not(.--disabled):not(.--from.--to):hover:before {
     border-left-color: var(--hilite-bg-primary);
     right: -1.4rem;
   }
 
-  .ui-calendar.--to .ui-calendar-date:not(.--empty):not(.--disabled):hover:before {
+  .ui-calendar.--to .ui-calendar-date:not(.--empty):not(.--disabled):not(.--from.--to):hover:before {
     border-right-color: var(--hilite-bg-primary);
     left: -1.4rem;
   }
 
-  .ui-calendar.--from .ui-calendar-date.--to:not(.--empty):not(.--disabled):hover:before {
+  .ui-calendar.--from .ui-calendar-date.--to:not(.--empty):not(.--disabled):not(.--from.--to):hover:before {
     border-left-color: transparent;
     border-right-color: var(--hilite-bg-primary);
     left: -1.4rem;
     right: auto;
   }
 
-  .ui-calendar.--to .ui-calendar-date.--from:not(.--empty):not(.--disabled):hover:before {
+  .ui-calendar.--to .ui-calendar-date.--from:not(.--empty):not(.--disabled):not(.--from.--to):hover:before {
     border-right-color: transparent;
     border-left-color: var(--hilite-bg-primary);
     left: auto;

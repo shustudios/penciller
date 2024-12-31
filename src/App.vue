@@ -1,27 +1,53 @@
 <template>
-  <ui-calendar
-    :filter="dateFilter"
-    :menu="false"
-    :parent="parentElm"
-  />
+  <ui-form>
+    <ui-field
+      type="phone"
+      name="phone"
+      label="Phone"
+      autocomplete="off"
+    />
+    <ui-field
+      type="number"
+      name="field"
+      label="Field"
+      autocomplete="off"
+      value="1234567890.88"
+      prefix="$"
+    />
+    <ui-field
+      type="text"
+      name="text"
+      label="Text"
+      autocomplete="off"
+      format="machine"
+    />
+    <ui-field
+      type="date"
+      name="date"
+      label="Date"
+      autocomplete="off"
+      value="2025-04-04"
+    />
+    <ui-field
+      type="daterange"
+      name="daterange"
+      label="Date"
+      autocomplete="off"
+    />
+    <ui-field
+      type="color"
+      name="color"
+      label="Color"
+      autocomplete="off"
+    />
+  </ui-form>
 </template>
 
 <script>
 export default {
   data: function () {
     return {
-      dateFilter: {
-        exclude: {
-          before: '2024-12-12',
-          after: '2024-12-25',
-          // is: ['2024-12-12', '2024-12-25', '2024-12-18'],
-        },
-        include: {
-          // before: '2024-12-06',
-          // after: '2024-12-16',
-          is: ['2024-12-09', '2024-12-02'],
-        }
-      },
+      dateFilter: null,
       parentElm: document.body,
       template: { val:'', sel: 'op3' },
       values: [
@@ -124,6 +150,22 @@ export default {
       console.log('close')
     }
   },
+  mounted: function () {
+    setTimeout(() => {
+      this.dateFilter = {
+        exclude: {
+          before: '2024-12-12',
+          after: '2024-12-25',
+          // is: ['2024-12-12', '2024-12-25', '2024-12-18'],
+        },
+        include: {
+          // before: '2024-12-06',
+          // after: '2024-12-16',
+          is: ['2024-12-09', '2024-12-02'],
+        }
+      }
+    }, 5000)
+  }
 }
 </script>
 
@@ -133,10 +175,6 @@ export default {
 }
 
 .ui-form {
-  max-width: 60rem;
-}
-
-.ui-calendar {
   max-width: 50rem;
 }
 

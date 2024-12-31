@@ -53,8 +53,7 @@
       <ui-calendar
         type="daterange"
         :value="localValue"
-        :min="this.min"
-        :max="this.max"
+        :filter="filter"
         :class="'--' + lastFocus"
         :parent="$el"
         @input="handleBalloonInput"
@@ -81,8 +80,7 @@ export default {
     focus: [String, Boolean],
     select: [String, Boolean],
     balloon: Object,
-    min: String,
-    max: String,
+    filter: Object,
     rules: {
       type: Array,
       default: () => ['required', 'daterange']
@@ -94,11 +92,24 @@ export default {
   },
   mixins: [UiFieldCore],
   data () {
+    let fromVal = ''
+    let toVal = ''
+
+    if (this.fieldValue) {
+      if (this.fieldValue.from) { fromVal = this.fieldValue.from }
+      if (this.fieldValue.to) { toVal = this.fieldValue.to }
+    }
+
     return {
       lastFocus: 'from',
       inrange: { from:true, to:true },
       valid: { from:true, to:true },
       maskedValue: this.fieldValue || { from:'', to:'' },
+      maskFormat: 'date',
+      masks: {
+        from: this.maskValue(fromVal, 'date'),
+        to: this.maskValue(toVal, 'date'),
+      }
     }
   },
   watch: {
@@ -111,24 +122,25 @@ export default {
     }
   },
   computed: {
-    localValue: {
-      get () {
-        let output = { from:'', to:'' }
+    localValue: function() {
+      let output = { from: '', to: '' }
 
-        if (!this.$penciller.utils.isUndefined(this.fieldValue) && this.fieldValue.hasOwnProperty('from')) {
-          output.from = this.fieldValue.from
-        }
-
-        if (!this.$penciller.utils.isUndefined(this.fieldValue) && this.fieldValue.hasOwnProperty('to')) {
-          output.to = this.fieldValue.to
-        }
-
-        return output
-      },
-      set (newValue) {
-        this.$emit('input', newValue)
-        return newValue
+      if (this.fieldValue) {
+        if (this.fieldValue.from) { output.from = this.fieldValue.from }
+        if (this.fieldValue.to) { output.to = this.fieldValue.to }
       }
+     
+      if (this.isValidFormat(output.from, this.maskFormat)) {
+        output.from = this.maskValue(output.from, this.maskFormat).val
+        this.masks.from.val = output.from
+      }
+
+      if (this.isValidFormat(output.to, this.maskFormat)) {
+        output.to = this.maskValue(output.to, this.maskFormat).val
+        this.masks.to.val = output.to
+      }
+
+      return output
     },
     localPlaceholder () {
       let output = 'yyyy-mm-dd'
@@ -204,30 +216,49 @@ export default {
       }
     },
     handleInput (e, dir) {
-      let input = e.currentTarget
-      let caret = input.selectionStart
-      let newValue = this.unmaskValue(input.value, 'date')
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      let newValue = e.currentTarget.value
+      let unmaskedValue = this.unmaskValue(newValue, this.maskFormat)
+      let cursor = e.currentTarget.selectionStart
+      let output = { ...this.localValue }
+
+      this.masks[dir].pos = cursor-1
       
-      if (this.isValidFormat(newValue)) {
-        let newFormat = this.maskValue(newValue, 'date', caret)
+      if (newValue === '' || this.isValidFormat(unmaskedValue, this.maskFormat) && e.data !== '-') {
+        this.masks[dir] = this.maskValue(unmaskedValue, this.maskFormat, cursor)
+        output[dir] = this.masks[dir].val
 
-        this.maskedValue[dir] = newFormat.val
-        this.$emit('input', this.maskedValue)
+        if (newValue.length === 10) {
+          let fromStamp = new Date(this.masks.from.val).getTime()
+          let toStamp = new Date(this.masks.to.val).getTime()
 
-      } else {
-        if (newValue !== '') {
-          e.preventDefault()
-          input.value = this.maskedValue[dir]
-        } else {
-          this.maskedValue[dir] = ''
-          this.$emit('input', this.maskedValue)
+          if (!isNaN(fromStamp) && !isNaN(toStamp)) {
+            if (fromStamp > toStamp) {
+              if (dir === 'from') {
+                this.masks.to.val = this.masks.from.val
+                output.to = this.masks.from.val
+              }
+              
+              if (dir === 'to') {
+                this.masks.from.val = this.masks.to.val
+                output.from = this.masks.to.val
+              }
+            }
+          }
         }
+
+        this.$emit('input', output)
       }
+
+      e.currentTarget.value = this.masks[dir].val
+      e.currentTarget.setSelectionRange(this.masks[dir].pos, this.masks[dir].pos)
     },
     handleBalloonInput (newValue) {
-      let publishValue = this.maskedValue
+      let publishValue = { from:this.masks.from.val, to: this.masks.to.val }
       publishValue[this.lastFocus] = newValue
-
+      
       let fromdate = new Date(publishValue.from + ' 00:00:00')
       let todate = new Date(publishValue.to + ' 00:00:00')
       let from = fromdate.getTime()

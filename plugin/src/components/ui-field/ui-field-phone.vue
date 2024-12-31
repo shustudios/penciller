@@ -46,47 +46,41 @@ export default {
   mixins: [UiFieldCore],
   data () {
     return {
-      maskedValue: '',
+      maskFormat: 'phone',
+      mask: this.maskValue(this.fieldValue, 'phone'),
     }
   },
   computed: {
-    localValue: {
-      get () {
-        if (this.isValidFormat(this.unmaskValue(this.fieldValue, 'phone'), 'phone')) {
-          return this.maskValue(this.fieldValue, 'phone').val
-        } else {
-          return ''
-        }
-      },
-      set (newValue) {
-        this.$emit('input', newValue)
-        return newValue
+    localValue: function() {
+      let output = this.fieldValue || ''
+     
+      if (output && this.isValidFormat(output, this.maskFormat)) {
+        output = this.maskValue(output, this.maskFormat).val
       }
+
+      return output
     },
   },
   methods: {
     handleInput (e) {
-      let newValue = this.unmaskValue(e.currentTarget.value, 'phone')
-      let caret = e.currentTarget.selectionStart
+      if (this.localDisabled) { return }
+      e.preventDefault()
+
+      let newValue = e.currentTarget.value
+      let unmaskedValue = this.unmaskValue(newValue, this.maskFormat)
+      let cursor = e.currentTarget.selectionStart
+
+      this.mask.pos = cursor-1
       
-      if (this.isValidFormat(newValue, 'phone')) {
-        let newFormat = this.maskValue(newValue, 'phone', caret)
-
-        this.$emit('input', newFormat.val)
-        this.maskedValue = newFormat.val
-
-        setTimeout(() => { this.$refs.input.setSelectionRange(newFormat.pos, newFormat.pos)},20)
-
-      } else {
-        if (newValue !== '') {
-          e.preventDefault()
-          e.currentTarget.value = this.maskedValue
-        } else {
-          this.$emit('input', '')
-        }
+      if (newValue === '' || this.isValidFormat(unmaskedValue, this.maskFormat) && e.data !== '-') {
+        this.mask = this.maskValue(unmaskedValue, this.maskFormat, cursor)
+        this.$emit('input', unmaskedValue)
       }
+
+      e.currentTarget.value = this.mask.val
+      e.currentTarget.setSelectionRange(this.mask.pos, this.mask.pos)
     },
-  },
+  }
 }
 </script>
 

@@ -87,80 +87,96 @@ export default {
 
       return output
     },
-    preCharCount (str, searchStr, sel) {
-      let arr = str.substring(0, sel).split(searchStr)
-      return arr.length - 1
-    },
     maskValue(str, format, sel) {
-      let val = str
+      let val = str || ''
       let pos = sel
-      let formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: this.digits })
 
       if (!this.$penciller.utils.isUndefined(str)) {
         switch (format) {
           case 'currency':
-            if (val !== '') {
-              let fval = formatter.format(val).replace('$', '')
-              let offset = this.preCharCount(fval, ',', sel)
+            let parts = str.split('.')
+            let arr = parts[0].split('')
+            let tmp = ''
+            let count = 0
 
-              pos = sel + offset
-              val = fval
-
-              if (fval.charAt(sel) === ',') { pos++ }
+            for (let idx=arr.length-1; idx>=0; idx--) {
+              tmp = arr[idx] + tmp
+              count++
+              
+              if (count % 3 === 0 && idx !== 0) {
+                tmp = ',' + tmp
+                pos++
+              }
             }
+
+            if (parts.length > 1) { val = tmp + '.' + parts[1] } else { val = tmp }
+            if (tmp.charAt(pos-1) === ',') { pos-- }
+            if (pos < 0) { pos = 0 }
+            
+            break
+
+          case 'machine':
+            val = val.replace(/[^a-zA-Z0-9]/g, '')
             break
             
-          case 'machine':
-            val = val.replace(/ /g,'-')
+          case 'machine-kabob':
+            val = str.replace(/ /g,'-')
             val = val.replace(/[^a-zA-Z0-9-]/g, '')
             break
 
-          case 'number':
-            val = false
+          case 'machine-snake':
+            val = str.replace(/ /g,'_')
+            val = val.replace(/[^a-zA-Z0-9_]/g, '')
+            break
 
+          case 'number':
             if (str.length === 0 || str === '-' || str === '.' ||  !isNaN(str)) {
               val = str
             }
             break
 
           case 'hex':
-            val = str.substring(1)
+            val = str.substring(1).toUpperCase()
             break
 
           case 'date':
             if (str.substr(4, 1) !== '-') {
-              if (val.length > 4 && val.length <= 10) {
+              if (str.length > 4 && str.length <= 10) {
                 if (sel === str.length && sel < 6) { pos++ }
-                val = str.slice(0, 4) + '-' + str.slice(4)
+                str = str.slice(0, 4) + '-' + str.slice(4)
               }
             }
     
-            if (val.substr(7, 1) !== '-') {
-              if (val.length > 7 && val.length <= 10) {
-                if (sel === (str.length+1) && sel < 9) { pos++ }
-                val = val.slice(0, 7) + '-' + val.slice(7)
+            if (str.substr(7, 1) !== '-') {
+              if (str.length > 7 && str.length <= 10) {
+                if (sel === str.length && sel < 9) { pos++ }
+                str = str.slice(0, 7) + '-' + str.slice(7)
               }
             }
+
+            val = str
             break
 
           case 'phone':
             if (str.substr(3, 1) !== '-') {
-              if (val.length > 3 && val.length <= 11) {
+              if (str.length > 3 && str.length <= 11) {
                 if (sel === str.length && sel < 5) { pos++ }
-                val = str.slice(0, 3) + '-' + str.slice(3)
+                str = str.slice(0, 3) + '-' + str.slice(3)
               }
             }
     
-            if (val.substr(7, 1) !== '-') {
-              if (val.length > 7 && val.length <= 11) {
-                if (sel == (str.length+1) && sel < 10) { pos++ }
-                val = val.slice(0, 7) + '-' + val.slice(7)
+            if (str.substr(7, 1) !== '-') {
+              if (str.length > 7 && str.length <= 11) {
+                if (sel === str.length && sel < 10) { pos++ }
+                str = str.slice(0, 7) + '-' + str.slice(7)
               }
             }
+            
+            val = str
             break
 
           case 'cc_expiry':
-            val = val.replace(/\D/g, '')
+            val = str.replace(/\D/g, '')
             val = val.replace(/(\d{2})/, '$1/')
             break
         }
@@ -175,7 +191,7 @@ export default {
         switch (format) {
           case 'phone':
           case 'date':
-            output = str.replace(/\D/g, '')
+            output = str.replace(/-/g, '')
             break
 
           case 'currency':
@@ -195,7 +211,25 @@ export default {
       let regex
 
       switch (format) {
+        case 'number':
+          regex = new RegExp(/^-?\d*\.?\d+$/)
+
+          if (regex.test(str)) {
+            output = true
+          }
+
+          break
+
         case 'machine':
+          regex = new RegExp(/[^a-zA-Z0-9]/g)
+
+          if (regex.test(str)) {
+            output = true
+          }
+
+          break
+
+        case 'machine-kabob':
           regex = new RegExp(/[^a-zA-Z0-9-]/g)
 
           if (regex.test(str)) {
@@ -204,9 +238,19 @@ export default {
 
           break
 
+        case 'machine-snake':
+          regex = new RegExp(/[^a-zA-Z0-9_]/g)
+
+          if (regex.test(str)) {
+            output = true
+          }
+
+          break
+
         case 'currency':
-          regex = new RegExp(/^\d{1,3}(,\d{3})*(\.\d{2})?$/)
-          
+          regex = new RegExp(/^\d{1,3}(,\d{3})*(\.\d{0,2})?$|^\d+(\.\d{0,2})?$/)
+          str = str.replace(/,/g,'')
+
           if (regex.test(str)) {
             output = true
           }
@@ -216,16 +260,49 @@ export default {
         case 'phone':
           regex = new RegExp(/^[0-9-]+$/g)
 
-          if (regex.test(str) && str.length < 11) {
-            output = true
+          if (str.length < 11) {
+            if (str.indexOf('-') !== -1) {
+              if (str.length <= 3) {
+                output = /^\d{0,3}$/.test(str)
+              } else if (str.length === 4) {
+                output = /^\d{3}-$/.test(str)
+              } else if (str.length <= 7) {
+                output = /^\d{3}-\d{0,3}$/.test(str)
+              } else if (str.length === 8) {
+                output = /^\d{3}-\d{3}-$/.test(str)
+              } else if (str.length <= 12) {
+                output = /^\d{3}-\d{3}-\d{0,4}$/.test(str)
+              }
+            } else {
+              if (regex.test(str)) {
+                output = true
+              }
+            }
           }
+          
           break
 
         case 'date':
           regex = new RegExp(/^[0-9-]+$/g)
 
-          if (regex.test(str) && str.length < 9) {
-            output = true
+          if (str.length < 11) {
+            if (str.indexOf('-') !== -1) {
+              if (str.length <= 4) {
+                output = /^\d{0,4}$/.test(str)
+              } else if (str.length === 5) {
+                output = /^\d{4}-$/.test(str)
+              } else if (str.length <= 7) {
+                output = /^\d{4}-\d{0,2}$/.test(str)
+              } else if (str.length === 8) {
+                output = /^\d{4}-\d{2}-$/.test(str)
+              } else if (str.length <= 10) {
+                output = /^\d{4}-\d{2}-\d{0,2}$/.test(str)
+              }
+            } else {
+              if (regex.test(str)) {
+                output = true
+              }
+            }
           }
           break
 
