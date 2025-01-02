@@ -56,6 +56,7 @@ export default {
      
       if (output && this.isValidFormat(output, this.maskFormat)) {
         output = this.maskValue(output, this.maskFormat).val
+        this.mask.val = output
       }
 
       return output

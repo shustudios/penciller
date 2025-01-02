@@ -1,45 +1,6 @@
 <template>
   <ui-form>
-    <ui-field
-      type="phone"
-      name="phone"
-      label="Phone"
-      autocomplete="off"
-    />
-    <ui-field
-      type="number"
-      name="field"
-      label="Field"
-      autocomplete="off"
-      value="1234567890.88"
-      prefix="$"
-    />
-    <ui-field
-      type="text"
-      name="text"
-      label="Text"
-      autocomplete="off"
-      format="machine"
-    />
-    <ui-field
-      type="date"
-      name="date"
-      label="Date"
-      autocomplete="off"
-      value="2025-04-04"
-    />
-    <ui-field
-      type="daterange"
-      name="daterange"
-      label="Date"
-      autocomplete="off"
-    />
-    <ui-field
-      type="color"
-      name="color"
-      label="Color"
-      autocomplete="off"
-    />
+
   </ui-form>
 </template>
 
@@ -47,6 +8,7 @@
 export default {
   data: function () {
     return {
+      myVal: '7808822184',
       dateFilter: null,
       parentElm: document.body,
       template: { val:'', sel: 'op3' },
@@ -136,7 +98,7 @@ export default {
       this.values = newValue
     },
     handleInput: function (newValue) {
-      console.log('---', newValue)
+      this.myVal = newValue
     },
     handleSubmit: function (form) {
       if (form) {

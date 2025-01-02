@@ -50,21 +50,24 @@ export default {
     }
   },
   mixins: [UiFieldCore],
+  data () {
+    return {
+      maskFormat: this.format,
+      mask: this.format ? this.maskValue(this.fieldValue || '', this.format) : null,
+    }
+  },
   computed: {
-    localValue: {
-      get () {
-        let output = this.fieldValue
-
-        if (!this.$penciller.utils.isUndefined(this.format)) {
-          output = this.maskValue(this.fieldValue, this.format).val
+    localValue: function() {
+      let output = this.fieldValue || ''
+     
+      if (!this.$penciller.utils.isUndefined(this.format)) {
+        if (output && this.isValidFormat(output, this.maskFormat)) {
+          output = this.maskValue(output, this.maskFormat).val
+          this.mask.val = output
         }
-
-        return output
-      },
-      set (newValue) {
-        this.$emit('input', newValue)
-        return newValue
       }
+
+      return output
     },
     hasIconListener () {
       let output = false

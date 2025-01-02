@@ -89,15 +89,16 @@ export default {
       decremented: false,
       isUpdating: false,
       maskFormat: format,
-      mask: this.maskValue(this.fieldValue.toString() || '', format),
+      mask: this.maskValue(this.fieldValue || '', format),
     }
   },
   computed: {
     localValue: function() {
-      let output = this.fieldValue.toString() || ''
+      let output = this.fieldValue || ''
       
       if (output && this.isValidFormat(output, this.maskFormat)) {
         output = this.maskValue(output, this.maskFormat).val
+        this.mask.val = output
       }
 
       return output

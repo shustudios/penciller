@@ -1,7 +1,7 @@
 <template>
   <div
     ref="swatch"
-    class="ui-swatch"
+    :class="swatchClass"
   >
     <div class="ui-swatch-body" v-if="options && options.length > 0">
       <div class="ui-swatch-slots">
@@ -54,6 +54,17 @@ export default {
     return {
       open: false,
       sample: this.validate(this.value)
+    }
+  },
+  computed: {
+    swatchClass: function () {
+      let output = 'ui-swatch'
+
+      if (Array.isArray(this.options) && this.options.length > 0) {
+        output += ' --options'
+      }
+
+      return output
     }
   },
   watch: {
@@ -327,6 +338,10 @@ export default {
   outline: none;
 }
 
+.ui-swatch.--options {
+  height: auto;
+}
+
 .ui-swatch-slots {
   display: flex;
   flex-wrap: wrap;
@@ -361,6 +376,7 @@ export default {
 .ui-swatch-samples {
   display: flex;
   height: calc(100% - 6.4rem);
+  position: relative;
 }
 
 .ui-swatch-sample {
@@ -378,20 +394,18 @@ export default {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .ui-swatch-samples:hover {
-    padding: 0.2rem;
-  }
-
-  .ui-swatch-samples:hover .ui-swatch-sample {
-    border: solid 0.2rem var(--dim-brdr-primary);
-  }
-
-  .ui-swatch-samples:hover .ui-swatch-sample:first-child {
-    border-right: none;
-  }
-
-  .ui-swatch-samples:hover .ui-swatch-sample:last-child {
-    border-left: none;
+  .ui-swatch-samples:hover:before {
+    content: 'Apply';
+    position: absolute;
+    width: 10rem;
+    left: calc(50% - 5rem);
+    top: calc(50% - 1rem);
+    padding: 0.4rem 1rem;
+    text-align: center;
+    background-color: var(--vellum);
+    font-size: 1.4rem;
+    border-radius: 1rem;
+    cursor: pointer;
   }
 }
 </style>

@@ -88,7 +88,13 @@ export default {
       return output
     },
     maskValue(str, format, sel) {
-      let val = str || ''
+      if (str) {
+        str = str.toString() 
+      } else {
+        str = ''
+      }
+
+      let val = str
       let pos = sel
 
       if (!this.$penciller.utils.isUndefined(str)) {
@@ -207,6 +213,12 @@ export default {
       return output
     },
     isValidFormat(str, format) {
+      if (str) {
+        str = str.toString() 
+      } else {
+        str = ''
+      }
+
       let output = false
       let regex
 
@@ -260,23 +272,23 @@ export default {
         case 'phone':
           regex = new RegExp(/^[0-9-]+$/g)
 
-          if (str.length < 11) {
-            if (str.indexOf('-') !== -1) {
-              if (str.length <= 3) {
-                output = /^\d{0,3}$/.test(str)
-              } else if (str.length === 4) {
-                output = /^\d{3}-$/.test(str)
-              } else if (str.length <= 7) {
-                output = /^\d{3}-\d{0,3}$/.test(str)
-              } else if (str.length === 8) {
-                output = /^\d{3}-\d{3}-$/.test(str)
-              } else if (str.length <= 12) {
-                output = /^\d{3}-\d{3}-\d{0,4}$/.test(str)
-              }
-            } else {
-              if (regex.test(str)) {
-                output = true
-              }
+          if (str.indexOf('-') !== -1) {
+            if (str.length <= 3) {
+              output = /^\d{0,3}$/.test(str)
+            } else if (str.length === 4) {
+              output = /^\d{3}-$/.test(str)
+            } else if (str.length <= 7) {
+              output = /^\d{3}-\d{0,3}$/.test(str)
+            } else if (str.length === 8) {
+              output = /^\d{3}-\d{3}-$/.test(str)
+            } else if (str.length <= 12) {
+              output = /^\d{3}-\d{3}-\d{0,4}$/.test(str)
+            } else if (str.length > 12) {
+              output = false
+            }
+          } else {
+            if (regex.test(str) && str.length < 11) {
+              output = true
             }
           }
           
@@ -285,23 +297,23 @@ export default {
         case 'date':
           regex = new RegExp(/^[0-9-]+$/g)
 
-          if (str.length < 11) {
-            if (str.indexOf('-') !== -1) {
-              if (str.length <= 4) {
-                output = /^\d{0,4}$/.test(str)
-              } else if (str.length === 5) {
-                output = /^\d{4}-$/.test(str)
-              } else if (str.length <= 7) {
-                output = /^\d{4}-\d{0,2}$/.test(str)
-              } else if (str.length === 8) {
-                output = /^\d{4}-\d{2}-$/.test(str)
-              } else if (str.length <= 10) {
-                output = /^\d{4}-\d{2}-\d{0,2}$/.test(str)
-              }
-            } else {
-              if (regex.test(str)) {
-                output = true
-              }
+          if (str.indexOf('-') !== -1) {
+            if (str.length <= 4) {
+              output = /^\d{0,4}$/.test(str)
+            } else if (str.length === 5) {
+              output = /^\d{4}-$/.test(str)
+            } else if (str.length <= 7) {
+              output = /^\d{4}-\d{0,2}$/.test(str)
+            } else if (str.length === 8) {
+              output = /^\d{4}-\d{2}-$/.test(str)
+            } else if (str.length <= 10) {
+              output = /^\d{4}-\d{2}-\d{0,2}$/.test(str)
+            } else if (str.length > 10) {
+              output = false
+            }
+          } else {
+            if (regex.test(str) && str.length < 9) {
+              output = true
             }
           }
           break

@@ -101,6 +101,7 @@ export default {
 
       if (output && this.isValidFormat(output, this.maskFormat)) {
         output = this.maskValue(output, this.maskFormat).val
+        this.mask.val = output
       }
 
       return output
@@ -165,6 +166,7 @@ export default {
       let cursor = e.currentTarget.selectionStart
 
       if (newValue === '' || this.isValidFormat('#' + newValue, this.maskFormat)) {
+        console.log('----', newValue)
         this.mask = this.maskValue(newValue, this.format, cursor)
         this.$emit('input', this.mask.val)
       }

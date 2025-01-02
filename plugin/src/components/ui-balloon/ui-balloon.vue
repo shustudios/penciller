@@ -175,7 +175,9 @@ export default {
           break
 
         case 'drawer':
-          output += 'top: calc(100% - ' + this.localY + 'px);'
+          // output += 'top: calc(100% - ' + this.localY + 'px);'
+          output += 'top: auto;'
+          output += 'bottom: 0;'
           break
       }
 
@@ -378,7 +380,7 @@ export default {
   overflow: auto;
 }
 
-.ui-balloon-screen.--dropdown .ui-balloonrev {
+.ui-balloon-screen.--dropdown .ui-balloon.rev {
   margin-top: -0.5rem;
 }
 
@@ -439,7 +441,7 @@ export default {
 
 .balloon-trans-drawer-enter-active,
 .balloon-trans-drawer-leave-active {
-  transition: top 0.2s ease-out;
+  transition: all 0.2s ease-out;
 }
 
 .balloon-trans-drawer-enter,

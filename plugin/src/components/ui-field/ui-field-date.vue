@@ -94,9 +94,10 @@ export default {
   computed: {
     localValue: function() {
       let output = this.fieldValue || ''
-     
+      
       if (output && this.isValidFormat(output, this.maskFormat)) {
         output = this.maskValue(output, this.maskFormat).val
+        this.mask.val = output
       }
 
       return output
@@ -204,7 +205,7 @@ export default {
       let cursor = e.currentTarget.selectionStart
 
       this.mask.pos = cursor-1
-      
+
       if (newValue === '' || this.isValidFormat(unmaskedValue, this.maskFormat) && e.data !== '-') {
         this.mask = this.maskValue(unmaskedValue, this.maskFormat, cursor)
         this.$emit('input', this.mask.val)
@@ -233,6 +234,7 @@ export default {
     handleBalloonInput (newValue) {
       this.$parent.localBadge = null
       this.valid = true
+      this.mask.val = newValue
       this.$emit('input', newValue)
       this.handleCloseBalloon()
       this.$refs.input.focus()
