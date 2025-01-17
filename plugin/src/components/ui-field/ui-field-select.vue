@@ -232,7 +232,7 @@ export default {
       this.localLabel = option.label
       this.$refs.title.focus()
       this.handleCloseBalloon()
-      this.$emit('input', val)
+      this.$emit('input', val, e)
     },
     formatItems (options) {
       let output = options

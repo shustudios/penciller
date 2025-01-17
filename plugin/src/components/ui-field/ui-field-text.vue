@@ -91,7 +91,7 @@ export default {
         e.currentTarget.value = newValue
       }
 
-      this.$emit('input', newValue)
+      this.$emit('input', newValue, e)
     },
     handleEnter (e,) {
       if (this.localDisabled) { return }

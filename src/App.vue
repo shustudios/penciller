@@ -1,15 +1,28 @@
 <template>
-  <ui-form>
-
-  </ui-form>
+  <ui-calendar
+    :value="myVal"
+    :parent="parentElm"
+    :filter="dateFilter"
+    @input="handleInput"
+  />
 </template>
 
 <script>
 export default {
   data: function () {
+    let today = new Date()
+    let tomorrow = new Date(today)
+    tomorrow.setDate(today.getDate() + 12)
+
     return {
-      myVal: '7808822184',
-      dateFilter: null,
+      myVal:  today,//{ year:2025, month:0, day:16 },
+      dateFilter: {
+        exclude: {
+          /*before: { year:2025, month:0, day:6 },
+          after: { year:2025, month:0, day:20 },*/
+          after: tomorrow
+        }
+      },
       parentElm: document.body,
       template: { val:'', sel: 'op3' },
       values: [
@@ -98,6 +111,7 @@ export default {
       this.values = newValue
     },
     handleInput: function (newValue) {
+      console.log(newValue)
       this.myVal = newValue
     },
     handleSubmit: function (form) {
@@ -113,20 +127,6 @@ export default {
     }
   },
   mounted: function () {
-    setTimeout(() => {
-      this.dateFilter = {
-        exclude: {
-          before: '2024-12-12',
-          after: '2024-12-25',
-          // is: ['2024-12-12', '2024-12-25', '2024-12-18'],
-        },
-        include: {
-          // before: '2024-12-06',
-          // after: '2024-12-16',
-          is: ['2024-12-09', '2024-12-02'],
-        }
-      }
-    }, 5000)
   }
 }
 </script>

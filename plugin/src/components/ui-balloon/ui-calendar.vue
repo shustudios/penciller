@@ -16,7 +16,7 @@
               :class="monthClass(yr, m)"
               :key="'mth_' + m"
               v-for="(mth, m) in monthnames"
-              @click="gotoDate(yr, m)"
+              @click="handleDate(yr, m)"
             >{{ mth.substring(0, 3) }}</div>
           </div>
         </div>
@@ -26,13 +26,13 @@
     <template v-else>
       <div class="ui-calendar-head">
         <div class="ui-calendar-ctrls">
-          <div class="ui-calendar-btn --prev" @click="getPrevMonth" />
-          <div class="ui-calendar-btn --next" @click="getNextMonth" />
+          <div class="ui-calendar-btn --prev" @click="handlePrevMonth" />
+          <div class="ui-calendar-btn --next" @click="handleNextMonth" />
         </div>
       </div>
       <div class="ui-calendar-body">
         <div class="ui-calendar-month" :style="inlinestyle" v-for="(itm, i) in months" :key="i">
-          <div :class="titleClass" @click="openShortcut">{{ itm.monthname }} {{ itm.year }}</div>
+          <div :class="titleClass" @click="handleShortcut">{{ itm.monthname }} {{ itm.year }}</div>
           <div class="ui-calendar-week">
             <div
               class="ui-calendar-weekday"
@@ -46,7 +46,7 @@
             <div
               :class="itemClass(subitm.id, subitm.disabled)"
               :key="j"
-              @click="selectDate(subitm.id, subitm.disabled)"
+              @click="handleSelect(subitm.id, subitm.disabled)"
               v-for="(subitm, j) in itm.dates"
             >
             {{ subitm.label }}
@@ -63,14 +63,18 @@ export default {
   name: 'ui-calendar',
   emits: ['input'],
   props: {
-    value: Object,
+    value: [Date, Object, String],
     filter: Object,
     type: String,
-    start: String,
+    start: [Date, Object, String],
     parent: null,
     menu: {
       type: Boolean,
       default: true,
+    },
+    format: {
+      type: String,
+      default: 'date',
     }
   },
   data () {
@@ -109,6 +113,21 @@ export default {
     }
   },
   computed: {
+    localValue: function () {
+      let output = null
+
+      if (this.type === 'daterange') {
+        if (this.value.from && this.value.to) {
+          output = this.formatRange(this.value)
+        }
+      } else {
+        if (this.value) {
+          output = this.formatValue(this.value)
+        }
+      }
+
+      return output
+    },
     titleClass: function () {
       let output = 'ui-calendar-title'
 
@@ -130,32 +149,155 @@ export default {
       this.inlinestyle = { width: 'calc(100% / ' + this.calcSize() + ')' }
 
       if (this.start) {
-        let parts = this.start.split('-')
-        this.date = this.parseDate({ year: Number(parts[0]), month: Number(parts[1])-1, day: Number(parts[2]) })
+        this.date = this.formatValue(this.start).plainObject
       } else {
-        if (this.value && this.value.from) {
-          this.date = this.parseDate(this.value.from)
+        if (this.localValue) {
+          if (this.type === 'daterange') {
+            this.date = this.localValue.plainObject.from
+          } else {
+            this.date = this.localValue.plainObject
+          }
         } else {
-          this.date = this.parseDate(this.value)
+          this.date = this.dateToObject(new Date())
         }
       }
 
       this.years = this.getYears()
       this.getMonths(this.date)
     },
-    parseDate (value) {
-      let output = {}
-      let date = value ? new Date(value.year, value.month, value.day) : new Date()
-      
-      if (isNaN(date.getFullYear()) || isNaN(date.getMonth()) || isNaN(date.getDate())) {
-        date = new Date()
+    calcSize () {
+      let w = this.parent.clientWidth
+      let output = 1
+
+      if (this.type === 'daterange') {
+
+        output = Math.floor(w / this.minWidth)
+
+        if (output > 4) { output = 4 }
+        if (output < 1) { output = 1 }
+
+      } else {
+        output = 1
       }
+
+      return output
+    },
+    isCorrectFormat (val) {
+      let output = false
+
+      if (typeof val === 'object') {
+        if (val instanceof Date && this.format === 'date') {
+          output = true
+        } else if (this.format === 'object') {
+          output = true
+        }
+      } else if (typeof val === 'string' && this.format === 'string') {
+        output = true
+      }
+
+      return output
+    },
+    formatRange (val) {
+      let output = null
+      let from = this.formatValue(val.from)
+      let to = this.formatValue(val.to)
+
+      if (from && to) {
+        output = {
+          plainObject: { from:from.plainObject, to:to.plainObject },
+          dateObject: { from:from.dateObject, to:to.dateObject },
+          dateString: { from:from.dateString, to:to.dateString },
+        }
+      }
+
+      return output
+    },
+    formatValue (val) {
+      let output = null
+
+      if (this.isCorrectFormat(val)) {
+        switch (this.format) {
+          case 'date':
+            output = {
+              plainObject: this.dateToObject(val),
+              dateObject: val,
+              dateString: this.dateToString(val)
+            }
+            break
+
+          case 'object':
+            output = {
+              plainObject: val,
+              dateObject: this.objectToDate(val),
+              dateString: this.objectToString(val)
+            }
+            break
+
+          case 'string':
+            output = {
+              plainObject: this.stringToObject(val),
+              dateObject: this.stringToDate(val),
+              dateString: val
+            }
+            break
+        }
+      }
+
+      return output
+    },
+    stringToDate (datestr) {
+      let output
+      let parts = datestr.split('-')
+      let year = Number(parts[0])
+      let month = Number(parts[1])-1
+      let day = Number(parts[2])
+
+      output = new Date(year, month, day)
+
+      return output
+    },
+    stringToObject (datestr) {
+      let output
+      let parts = datestr.split('-')
+
+      output = {
+        year: Number(parts[0]),
+        month: Number(parts[1])-1,
+        day: Number(parts[2]),
+      }
+
+      return output
+    },
+    dateToObject (date) {
+      let output
 
       output = {
         year: date.getFullYear(),
         month: date.getMonth(),
         day: date.getDate(),
       }
+
+      return output
+    },
+    dateToString (date) {
+      let output = ''
+
+      output += String(date.getFullYear()) + '-'
+      output += String(date.getMonth() + 1).padStart(2, 0) + '-'
+      output += String(date.getDate()).padStart(2, 0)
+
+      return output
+    },
+    objectToDate (obj) {
+      let output = new Date(obj.year, obj.month, obj.day)
+      return output
+    },
+    objectToString (obj) {
+      let output = ''
+
+      output += String(obj.year) + '-'
+      output += String(obj.month + 1).padStart(2, 0) + '-'
+      output += String(obj.day).padStart(2, 0)
 
       return output
     },
@@ -167,22 +309,6 @@ export default {
         let sel = this.$refs.shortcut.getElementsByClassName('ui-shortcut-item --selected')[0]
         let center = sel.offsetTop - (this.$refs.shortcut.offsetHeight / 2)
         this.$refs.shortcut.scrollTo(0, center)
-      })
-    },
-    handleMonths: function (idx) {
-      if (!this.menu) { return }
-      if (idx > 0) { return }
-      this.shortcut = 'month'
-    },
-    handleYears: function (idx) {
-      if (!this.menu) { return }
-      if (idx > 0) { return }
-      this.shortcut = 'year'
-
-      this.$nextTick(() => {
-        let sel = this.$refs.years.getElementsByClassName('--selected')[0]
-        let center = sel.offsetTop - (this.$refs.years.offsetHeight / 2)
-        this.$refs.years.scrollTo(0, center)
       })
     },
     closeShortcut () {
@@ -208,40 +334,29 @@ export default {
     },
     itemClass (id, disabled) {
       let output = 'ui-calendar-date'
-      let now = new Date()
-      let today = {
-        year: now.getFullYear(),
-        month: now.getMonth(),
-        day: now.getDate(),
-      }
+      let today = this.dateToString(new Date())
 
-      if (id === this.stringFormat(today)) {
+      if (id === today) {
         output += ' --today'
       }
 
       if (this.type === 'daterange') {
-        if (typeof this.value === 'object') {
-          let val = this.$penciller.utils.clone(this.value)
-          val.id = id
+        if (this.localValue !== null) {
 
-          let f = new Date(val.from).getTime()
-          let t = new Date(val.to).getTime()
-          let i = new Date(val.id).getTime()
+          let f = new Date(this.localValue.dateString.from).getTime()
+          let t = new Date(this.localValue.dateString.to).getTime()
+          let i = new Date(id).getTime()
 
-          if (id === this.value.from) { output += ' --from' }
-          if (id === this.value.to) { output += ' --to' }
+          if (id === this.localValue.dateString.from) { output += ' --from' }
+          if (id === this.localValue.dateString.to) { output += ' --to' }
 
           if (i > f && i < t) {
             output += ' --between'
           }
         }
       } else {
-        if (this.value) {
-          let valstr = this.stringFormat(this.value)
-
-          if (id === valstr) {
-            output += ' --selected'
-          }
+        if (this.localValue && id === this.localValue.dateString) {
+          output += ' --selected'
         }
       }
 
@@ -255,33 +370,6 @@ export default {
 
       return output
     },
-    calcSize () {
-      let w = this.parent.clientWidth
-      let output = 1
-
-      if (this.type === 'daterange') {
-
-        output = Math.floor(w / this.minWidth)
-
-        if (output > 4) { output = 4 }
-        if (output < 1) { output = 1 }
-
-      } else {
-        output = 1
-      }
-
-      return output
-    },
-    stringFormat (date) {
-      let year = String(date.year)
-      let month = String(date.month + 1)
-      let day = String(date.day)
-
-      if (month < 10) { month = '0' + month }
-      if (day < 10) { day = '0' + day }
-
-      return year + '-' + month + '-' + day
-    },
     nextMonth (date) {
       let month = date.month + 1
       let year = date.year
@@ -291,13 +379,7 @@ export default {
         year++
       }
 
-      let next = new Date(year, month, 15)
-
-      return {
-        year: next.getFullYear(),
-        month: next.getMonth(),
-        day: next.getDate(),
-      }
+      return this.dateToObject(new Date(year, month, 15))
     },
     prevMonth (date) {
       let month = date.month - 1
@@ -308,30 +390,7 @@ export default {
         year--
       }
 
-      let prev = new Date(year, month, 15)
-
-      return {
-        year: prev.getFullYear(),
-        month: prev.getMonth(),
-        day: prev.getDate(),
-      }
-    },
-    getNextMonth () {
-      this.date = this.nextMonth(this.date)
-      this.getMonths(this.date)
-    },
-    getPrevMonth () {
-      this.date = this.prevMonth(this.date)
-      this.getMonths(this.date)
-    },
-    getMonths (date) {
-      this.months = []
-      let colMonth = date
-
-      for (let i=0; i<this.columns; i++) {
-        this.months.push(this.getMonth(colMonth))
-        colMonth = this.nextMonth(colMonth)
-      }
+      return this.dateToObject(new Date(year, month, 15))
     },
     getMonth (date) {
       let lastObj = new Date(date.year, date.month, 0) // last day of prev month
@@ -365,14 +424,24 @@ export default {
           }
 
           id = strYear + '-' + strMonth + '-' + strDay
-          datetime = new Date(id).getTime()
-          disabled = this.isDisabled(datetime, id)
+          
+          datetime = this.stringToDate(id).getTime()
+          disabled = this.filterDate(datetime, id)
         }
         
         dates.push({ label, id, disabled })
       }
 
       return { month: strMonth, monthname: strMonthname, year: strYear, dates: dates }
+    },
+    getMonths (date) {
+      this.months = []
+      let colMonth = date
+
+      for (let i=0; i<this.columns; i++) {
+        this.months.push(this.getMonth(colMonth))
+        colMonth = this.nextMonth(colMonth)
+      }
     },
     getYears () {
       let output = []
@@ -383,36 +452,7 @@ export default {
 
       return output
     },
-    gotoMonth (month) {
-      this.date = { year: this.date.year, month, day: this.date.day }
-      this.getMonths(this.date)
-      this.shortcut = false
-    },
-    gotoYear (year) {
-      this.date = { year, month: this.date.month, day: this.date.day }
-      this.getMonths(this.date)
-      this.shortcut = false
-    },
-    gotoDate (year, month) {
-      this.date = { year, month, day: this.date.day }
-      this.getMonths(this.date)
-      this.shortcut = false
-    },
-    selectDate (date, disabled) {
-      if (date !== null && disabled !== true) {
-        this.$emit('input', date)
-      }
-    },
-    isValidDate (y, m, d) {
-      if (!y) { return false }
-      if (!m) { return false }
-      if (!d) { return false }
-      
-      let date = new Date(y, m, d)
-
-      return date instanceof Date && !isNaN(date)
-    },
-    isDisabled(datetime, datestring) {
+    filterDate(datetime, datestring) {
       let output = null
       let before = false
       let after = false
@@ -421,40 +461,58 @@ export default {
       if (this.filter) {
         for (let key in this.filter.exclude) {
           let val = this.filter.exclude[key]
-          let filtertime = new Date(val).getTime()
+          let filtertime = this.formatValue(val)
+          
+          if (filtertime) {
+            filtertime.dateObject.setHours(0,0,0,0)
+            filtertime = filtertime.dateObject.getTime()
+          }
 
           switch (key) {
             case 'before':
-              if (datetime < filtertime) {
-                output = true
-              }
+              if (filtertime) {
+                if (datetime < filtertime) {
+                  output = true
+                }
 
-              before = true
+                before = true
+              }
               break
 
             case 'after':
-              if (datetime > filtertime) {
-                output = true
-              } else {
-                if (!before) { output = null }
-              }
+              if (filtertime) {
+                if (datetime > filtertime) {
+                  output = true
+                } else {
+                  if (!before) { output = null }
+                }
 
-              after = true
+                after = true
+              }
               break
 
             case 'is':
               if (Array.isArray(val)) {
-                if (val.includes(datestring)) {
+                let filtertimes = []
+                
+                val.forEach(date => {
+                  filtertimes.push(this.formatValue(date).dateString)
+                })
+                
+                if (filtertimes.includes(datestring)) {
                   output = true
                 } else {
                   if (!before && !after) { output = null }
                 }
               } else {
-                if (datetime === filtertime) {
-                  output = true
-                } else {
-                  if (!before && !after) { output = null }
+                if (filtertime) {
+                  if (datetime === filtertime) {
+                    output = true
+                  } else {
+                    if (!before && !after) { output = null }
+                  }
                 }
+                
               }
               break
           }
@@ -464,42 +522,60 @@ export default {
 
         for (let key in this.filter.include) {
           let val = this.filter.include[key]
-          let filtertime = new Date(val).getTime()
+          let filtertime = this.formatValue(val)
+
+          if (filtertime) {
+            filtertime.dateObject.setHours(0,0,0,0)
+            filtertime = filtertime.dateObject.getTime()
+          }
 
           switch (key) {
             case 'before':
-              if (datetime >= filtertime) {
-                 if (!exclude) { output = true }
-              } else {
-                output = null
-              }
+              if (filtertime) {
+                if (datetime >= filtertime) {
+                  if (!exclude) { output = true }
+                } else {
+                  output = null
+                }
 
-              before = true
+                before = true
+              }
               break
 
             case 'after':
-              if (datetime <= filtertime) {
-                if (!before) { output = true }
-              } else {
-                output = null
-              }
+              if (filtertime) {
+                if (datetime <= filtertime) {
+                  if (!before) { output = true }
+                } else {
+                  output = null
+                }
 
-              after = true
+                after = true
+              }
               break
 
             case 'is':
               if (Array.isArray(val)) {
-                if (!val.includes(datestring)) {
+                let filtertimes = []
+                
+                val.forEach(date => {
+                  filtertimes.push(this.formatValue(date).dateString)
+                })
+
+                if (!filtertimes.includes(datestring)) {
                   if (!before && !after) { output = true }
                 } else {
                   output = null
                 }
               } else {
-                if (datetime !== filtertime) {
-                  if (!before && !after) { output = true }
-                } else {
-                  output = null
+                if (filtertime) {
+                  if (datetime !== filtertime) {
+                    if (!before && !after) { output = true }
+                  } else {
+                    output = null
+                  }
                 }
+                
               }
               break
           }
@@ -507,7 +583,44 @@ export default {
       }
 
       return output
-    }
+    },
+    handleNextMonth () {
+      this.date = this.nextMonth(this.date)
+      this.getMonths(this.date)
+    },
+    handlePrevMonth () {
+      this.date = this.prevMonth(this.date)
+      this.getMonths(this.date)
+    },
+    handleDate (year, month) {
+      this.date = { year, month, day: this.date.day }
+      this.getMonths(this.date)
+      this.closeShortcut()
+    },
+    handleShortcut () {
+      this.openShortcut()
+    },
+    handleSelect (date, disabled) {
+      let output
+      
+      if (!isNaN(new Date(date).getTime()) && disabled !== true) {
+        switch (this.format) {
+          case 'date':
+            output = this.stringToDate(date)
+            break
+
+          case 'object':
+            output = this.stringToObject(date)
+            break
+
+          case 'string':
+            output = date
+            break
+        }
+
+        this.$emit('input', output)
+      }
+    },
   },
   mounted () {
     if (typeof window === 'object') {

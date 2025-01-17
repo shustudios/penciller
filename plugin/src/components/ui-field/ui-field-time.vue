@@ -424,7 +424,6 @@ export default {
 
       this.$parent.localBadge = null
       this.localValue = output
-      console.log(this.hour, this.minute, this.daytime)
       this.$emit('input', output)
     },
     handleHourInput (e) {

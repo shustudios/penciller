@@ -52,6 +52,7 @@
     >
       <ui-calendar
         type="daterange"
+        format="string"
         :value="localValue"
         :filter="filter"
         :class="'--' + lastFocus"
@@ -249,7 +250,7 @@ export default {
           }
         }
 
-        this.$emit('input', output)
+        this.$emit('input', output, e)
       }
 
       e.currentTarget.value = this.masks[dir].val

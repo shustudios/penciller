@@ -237,7 +237,7 @@ export default {
 
       if (newValue === '' || this.isValidFormat(unmaskedValue, this.maskFormat)) {
         this.mask = this.maskValue(unmaskedValue, this.maskFormat, cursor + (unmaskedValue.length - newValue.length))
-        this.$emit('input', unmaskedValue)
+        this.$emit('input', unmaskedValue, e)
       }
 
       e.currentTarget.value = this.mask.val

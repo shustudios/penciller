@@ -79,7 +79,7 @@ export default {
       let newValue = e.currentTarget.value
 
       this.valid = true
-      this.$emit('input', newValue)
+      this.$emit('input', newValue, e)
     },
     handleBlur (e) {
       if (this.localValue !== '') {

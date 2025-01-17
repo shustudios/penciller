@@ -36,6 +36,7 @@
     >
       <ui-calendar
         ref="calendar"
+        format="string"
         :value="balloonValue"
         :filter="filter"
         :parent="parentElm"
@@ -208,7 +209,7 @@ export default {
 
       if (newValue === '' || this.isValidFormat(unmaskedValue, this.maskFormat) && e.data !== '-') {
         this.mask = this.maskValue(unmaskedValue, this.maskFormat, cursor)
-        this.$emit('input', this.mask.val)
+        this.$emit('input', this.mask.val, e)
       }
 
       e.currentTarget.value = this.mask.val

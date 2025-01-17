@@ -183,11 +183,11 @@ export default {
     }
   },
   methods: {
-    handleInput (newValue) {
+    handleInput (newValue, e) {
       this.localBadge = null
       this.localValue = newValue
       this.$emit('update:value', newValue)
-      this.$emit('input', newValue)
+      this.$emit('input', newValue, e)
     },
     handleCheck (newValue) {
       this.$emit('update:checked', newValue)

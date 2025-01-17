@@ -112,7 +112,7 @@ export default {
     },
     handleInput (e) {
       let newValue = e.currentTarget.value
-      this.$emit('input', newValue)
+      this.$emit('input', newValue, e)
     },
     handleGenerate (e) {
       if (this.localDisabled) { return }

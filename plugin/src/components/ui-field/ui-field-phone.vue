@@ -75,7 +75,7 @@ export default {
       
       if (newValue === '' || this.isValidFormat(unmaskedValue, this.maskFormat) && e.data !== '-') {
         this.mask = this.maskValue(unmaskedValue, this.maskFormat, cursor)
-        this.$emit('input', unmaskedValue)
+        this.$emit('input', unmaskedValue, e)
       }
 
       e.currentTarget.value = this.mask.val
